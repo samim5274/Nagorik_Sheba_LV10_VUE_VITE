@@ -6,7 +6,7 @@
       :isDark="isDark" @toggle-theme="toggleTheme"
     />
 
-    <div class="flex">
+    <div class="flex  min-h-[calc(100vh-56px)]">
       <Navbar
         v-model="active"
         :open="sidebarOpen"
@@ -16,13 +16,9 @@
       />
 
       <!-- Content -->
-      <main class="flex-1">
-        <div class="p-6">
-          <!-- তোমার content এখানে যাবে -->
-          <slot />
-          <!-- অথবা router ব্যবহার করলে: <router-view /> -->
-        </div>
-      </main>
+      <div class="flex-1 min-w-0">
+        <Main class="w-full h-full" />
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +29,7 @@ import { useRouter } from "vue-router";
 
 import Navbar from './navbar.vue'
 import Header from './header.vue'
+import Main from './main.vue';
 
 const sidebarOpen = ref(false);
 const active = ref("dashboard");

@@ -2,8 +2,7 @@
   <header
     class="sticky top-0 z-30 border-b backdrop-blur
            bg-white/80 text-slate-900 border-slate-200
-           dark:bg-slate-900/80 dark:text-slate-100 dark:border-white/10"
-  >
+           dark:bg-slate-900/80 dark:text-slate-100 dark:border-white/10">
     <div class="h-14 px-4 lg:px-6 flex items-center gap-4">
       <!-- Left: Mobile menu -->
       <button
@@ -21,12 +20,12 @@
       <!-- Brand -->
       <div class="flex items-center gap-3 min-w-[120px]">
         <div class="font-semibold tracking-wide text-lg text-slate-900 dark:text-white">
-          Windmill
+          Nagorik Sheba
         </div>
       </div>
 
       <!-- Search -->
-      <div class="flex-1 flex justify-center">
+      <div class="hidden md:flex flex-1 justify-center">
         <div class="w-full max-w-2xl">
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -41,10 +40,10 @@
               type="text"
               placeholder="Search for projects"
               class="w-full rounded-xl border outline-none
-                     bg-white text-slate-900 border-slate-200 placeholder:text-slate-400
-                     pl-10 pr-3 py-2.5
-                     focus:ring-2 focus:ring-emerald-500/40
-                     dark:bg-white/10 dark:text-slate-100 dark:border-white/10"
+                    bg-white text-slate-900 border-slate-200 placeholder:text-slate-400
+                    pl-10 pr-3 py-2.5
+                    focus:ring-2 focus:ring-emerald-500/40
+                    dark:bg-white/10 dark:text-slate-100 dark:border-white/10"
               @keydown.enter="$emit('search', q)"
             />
           </div>

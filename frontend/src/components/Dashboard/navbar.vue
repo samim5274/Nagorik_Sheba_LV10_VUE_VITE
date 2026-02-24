@@ -22,7 +22,7 @@
         <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
       </span>
 
-      <div class="text-lg font-semibold tracking-wide">Windmill</div>
+      <div class="text-lg font-semibold tracking-wide">Nagorik Sheba</div>
 
       <button
         class="ml-auto p-2 rounded-lg lg:hidden
