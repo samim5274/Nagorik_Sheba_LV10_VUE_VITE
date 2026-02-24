@@ -12,7 +12,6 @@
         :open="sidebarOpen"
         @close="sidebarOpen = false"
         @navigate="onNavigate"
-        @toggle-theme="toggleTheme"
       />
 
       <!-- Content -->

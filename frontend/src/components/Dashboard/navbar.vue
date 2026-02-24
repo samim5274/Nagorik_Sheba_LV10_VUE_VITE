@@ -1,9 +1,8 @@
 <template>
   <!-- Overlay (mobile) -->
   <div
-    class="fixed inset-0 z-40 lg:hidden
-           bg-black/40 dark:bg-black/60"
-    :class="open ? 'block' : 'hidden'"
+    class="fixed inset-0 z-40 lg:hidden bg-black/40 dark:bg-black/60"
+    v-show="open"
     @click="$emit('close')"
   />
 
@@ -25,8 +24,7 @@
       <div class="text-lg font-semibold tracking-wide">Nagorik Sheba</div>
 
       <button
-        class="ml-auto p-2 rounded-lg lg:hidden
-               hover:bg-slate-100 text-slate-700
+        class="ml-auto p-2 rounded-lg lg:hidden hover:bg-slate-100 text-slate-700
                dark:hover:bg-white/10 dark:text-slate-200"
         aria-label="Close menu"
         @click="$emit('close')"
@@ -40,13 +38,13 @@
     <!-- Menu -->
     <nav class="p-3">
       <ul class="space-y-1">
+        <!-- Main items -->
         <li v-for="item in mainItems" :key="item.key">
           <button
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition
                    focus:outline-none focus:ring-2 focus:ring-emerald-500/40
-                   hover:bg-slate-100
-                   dark:hover:bg-white/10"
-            :class="modelValue === item.key
+                   hover:bg-slate-100 dark:hover:bg-white/10"
+            :class="activeKey === item.key
               ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-white/10 dark:text-white dark:ring-white/10'
               : ''"
             @click="pick(item.key)"
@@ -61,15 +59,16 @@
           <button
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition
                    focus:outline-none focus:ring-2 focus:ring-emerald-500/40
-                   hover:bg-slate-100
-                   dark:hover:bg-white/10"
+                   hover:bg-slate-100 dark:hover:bg-white/10"
             :class="pagesOpen
               ? 'bg-slate-100 ring-1 ring-slate-200 dark:bg-white/10 dark:ring-white/10'
               : ''"
             @click="pagesOpen = !pagesOpen"
+            type="button"
           >
-            <span class="opacity-90"><IconFolder /></span>
+            <span class="opacity-90"><component :is="IconFolder" /></span>
             <span class="text-sm font-medium flex-1">Pages</span>
+
             <svg
               class="h-4 w-4 transition-transform opacity-80"
               :class="pagesOpen ? 'rotate-180' : ''"
@@ -91,9 +90,8 @@
               <li v-for="p in pageItems" :key="p.key">
                 <button
                   class="w-full px-4 py-2 text-sm text-left transition
-                         hover:bg-white
-                         dark:hover:bg-white/10"
-                  :class="modelValue === p.key
+                         hover:bg-white dark:hover:bg-white/10"
+                  :class="activeKey === p.key
                     ? 'bg-white text-slate-900 font-medium dark:bg-white/10 dark:text-white'
                     : 'text-slate-700 dark:text-slate-200/90'"
                   @click="pick(p.key)"
@@ -110,24 +108,51 @@
 </template>
 
 <script setup>
-import { computed, h, ref } from "vue";
+import { computed, h, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-defineProps({
+const props = defineProps({
   open: { type: Boolean, default: false },
-  modelValue: { type: String, default: "dashboard" },
+  modelValue: { type: String, default: "" },
 });
 
 const emit = defineEmits(["close", "update:modelValue", "navigate"]);
 
+const route = useRoute();
+const router = useRouter();
+
 const pagesOpen = ref(false);
 
-function pick(key) {
+/* key -> route map */
+const routeMap = {
+  dashboard: "/dashboard",
+  create: "/create",
+};
+
+/* route দেখে active key */
+const activeKey = computed(() => {
+  const path = route.path;
+  const found = Object.entries(routeMap).find(([, p]) => p === path);
+  return found ? found[0] : "dashboard";
+});
+
+/* click: update + navigate + close (mobile) */
+async function pick(key) {
   emit("update:modelValue", key);
   emit("navigate", key);
-  emit("close"); // mobile drawer close
+
+  const to = routeMap[key];
+  if (to && route.path !== to) {
+    await router.push(to);
+  }
+
+  // Pages এর ভিতর click করলে dropdown বন্ধ করতে চাইলে:
+  // pagesOpen.value = false;
+
+  emit("close");
 }
 
-/* Icons */
+/* Icons helper */
 const Icon = (paths) =>
   computed(() =>
     h(
@@ -148,7 +173,7 @@ const IconFolder = Icon(["M3 7h6l2 2h10v10H3V7"]);
 
 const mainItems = [
   { key: "dashboard", label: "Dashboard", icon: IconHome },
-  { key: "forms", label: "Forms", icon: IconForms },
+  { key: "create", label: "Create-Complain", icon: IconForms },
   { key: "cards", label: "Cards", icon: IconCards },
   { key: "charts", label: "Charts", icon: IconCharts },
   { key: "buttons", label: "Buttons", icon: IconButtons },
@@ -163,4 +188,13 @@ const pageItems = [
   { key: "404", label: "404" },
   { key: "blank", label: "Blank" },
 ];
+
+watch(
+  () => activeKey.value,
+  (k) => {
+    const pageKeys = pageItems.map(x => x.key);
+    if (pageKeys.includes(k)) pagesOpen.value = true;
+  },
+  { immediate: true }
+);
 </script>

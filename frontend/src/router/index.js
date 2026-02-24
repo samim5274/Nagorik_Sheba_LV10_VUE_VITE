@@ -3,12 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../components/Auth/login.vue'
 import Register from '../components/Auth/register.vue'
 import dashboard from '../components/Dashboard/dashboard.vue'
+import createComplain from '../components/Complain/create-complain.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', component: Login, meta: {title: "Login"} },
   { path: '/register', component: Register, meta: {title: "Register"} },
-  { path: '/dashboard', component: dashboard, meta: { requiresAuth: true } },
+  { path: '/dashboard', component: dashboard, meta: { requiresAuth: true, title: "Dashboard" } },
+  { path: '/create', component: createComplain, meta: { requiresAuth: true, title: "Create" } },
 ]
 
 const router = createRouter({

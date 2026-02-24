@@ -185,6 +185,10 @@
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import { useRouter } from 'vue-router';
+import api from '../../services/api';
+
+const router = useRouter();
 
 defineProps({
   isDark: { type: Boolean, default: false },
@@ -219,9 +223,24 @@ function closeAll() {
   profileOpen.value = false;
 }
 
-function pickProfile(action) {
+async function pickProfile(action) {
   console.log("profile action:", action);
-  closeAll();
+
+  if (action !== "logout") {
+    closeAll();
+    return;
+  }
+
+  try{
+    await api.post("/logout");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/login");
+  }catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    closeAll();
+  }
 }
 
 /* click outside -> close */
