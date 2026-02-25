@@ -11,7 +11,6 @@
         v-model="active"
         :open="sidebarOpen"
         @close="sidebarOpen = false"
-        @navigate="onNavigate"
       />
 
       <!-- Content -->
@@ -51,12 +50,7 @@ function onSearch(q) {
   console.log("search:", q);
 }
 
-function onNavigate(key) {
-  console.log("navigate:", key);
-  // router mapping চাইলে:
-  // const map = { dashboard: "/dashboard", forms: "/forms", login: "/login" };
-  // if (map[key]) router.push(map[key]);
-}
+
 
 /* ESC to close drawer */
 onMounted(() => {
