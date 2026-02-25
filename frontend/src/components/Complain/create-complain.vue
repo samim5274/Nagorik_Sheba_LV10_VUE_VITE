@@ -119,24 +119,39 @@ function resetForm() {
         // remark: ""
     })
 
-    divisions.value = [];
+    // divisions.value = [];
     districts.value = [];
     upazilas.value = [];
     policeStations.value = [];
 }
 
-// get division
-async function getDivision() {
+// ==============================
+// Location Loaders (Clean Version)
+// ==============================
+
+// Reusable state reset helper
+function resetErrorAndLoading() {
   loading.value = true;
   errorMsg.value = "";
+}
+
+// Reusable error handler helper
+function handleApiError(err, fallbackMessage, targetRef) {
+  console.error(fallbackMessage, err);
+  errorMsg.value = err?.response?.data?.message || fallbackMessage;
+  if (targetRef) targetRef.value = [];
+}
+
+// get division
+async function getDivision() {
+  resetErrorAndLoading();
 
   try{
     const res = await api.get('/create/get-division');
     divisions.value = res.data?.data ?? [];
   } catch (err){        
     console.error("Division load error:", err);
-    errorMsg.value = err?.response?.data?.message || "Failed to load divisions";
-    divisions.value = [];
+    handleApiError(err, "Failed to load divisions", divisions);
   } finally{
       loading.value = false;
   }
@@ -144,13 +159,22 @@ async function getDivision() {
 
 // get division wise districk
 async function onDivisionChange() {
-  // console.log("Selected division:", form.division_id);
+  resetErrorAndLoading();
 
-  loading.value = true;
-  errorMsg.value = "";
-
+  // Reset dependent fields
   form.district_id = "";
+  form.upazila_id = "";
+  form.police_station_id = "";
+
   districts.value = [];
+  upazilas.value = [];
+  policeStations.value = [];
+
+  // No division selected
+  if (!form.division_id) {
+    loading.value = false;
+    return;
+  }
 
   try{
     const res = await api.get(`/create/get-district/${form.division_id}`);
@@ -158,8 +182,7 @@ async function onDivisionChange() {
     // console.log(districts.value);
   } catch (err){        
     console.error("Division load error:", err);
-    errorMsg.value = err?.response?.data?.message || "Failed to load districts";
-    districts.value = [];
+    handleApiError(err, "Failed to load districts", districts);
   } finally{
       loading.value = false;
   }
@@ -167,11 +190,20 @@ async function onDivisionChange() {
 
 // get upazila
 async function onDistrictChange() {
-  loading.value = true;
-  errorMsg.value = "";
+  resetErrorAndLoading();
 
+  // Reset dependent fields
   form.upazila_id = "";
-  upazilas.value = "";
+  form.police_station_id = "";
+
+  upazilas.value = [];
+  policeStations.value = [];
+
+  // No district selected
+  if (!form.district_id) {
+    loading.value = false;
+    return;
+  }
 
   try{
     const res = await api.get(`/create/get-upazila/${form.district_id}`);
@@ -179,8 +211,7 @@ async function onDistrictChange() {
     // console.log(upazilas.value);
   } catch (err){        
     console.error("Division load error:", err);
-    errorMsg.value = err?.response?.data?.message || "Failed to load upazilas";
-    upazilas.value = [];
+    handleApiError(err, "Failed to load upazilas", upazilas);
   } finally{
       loading.value = false;
   }
@@ -188,20 +219,25 @@ async function onDistrictChange() {
 
 // get police station
 async function onUpazilaChange() {
-  loading.value = true;
-  errorMsg.value = "";
+  resetErrorAndLoading();
 
+  // Reset dependent field
   form.police_station_id = "";
-  policeStations.value = "";
+  policeStations.value = [];
+
+  // No upazila selected
+  if (!form.upazila_id) {
+    loading.value = false;
+    return;
+  }
 
   try{
     const res = await api.get(`/create/get-policeStations/${form.upazila_id}`);
     policeStations.value = res.data?.data ?? [];
-    console.log(policeStations.value);
+    // console.log(policeStations.value);
   } catch (err){        
     console.error("Division load error:", err);
-    errorMsg.value = err?.response?.data?.message || "Failed to load policeStations";
-    policeStations.value = [];
+    handleApiError(err, "Failed to load police stations", policeStations);
   } finally{
       loading.value = false;
   }
