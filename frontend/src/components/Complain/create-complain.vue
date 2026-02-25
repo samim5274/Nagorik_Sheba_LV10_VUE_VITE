@@ -28,51 +28,86 @@
 
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <form @submit.prevent>
-                      <div>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                          <div>
-                              <label class="block text-xs font-semibold text-slate-600 mb-2">Division <span class="text-red-500">*</span></label>
-                              <select v-model="form.division_id" @change="onDivisionChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                                  <option value="" selected disabled>-- Select Divison --</option>   
-                                  <option v-for="val in divisions" :key="val.id" :value="val.id">{{ val.name }} - {{ val.bn_name }}</option>                               
-                              </select>
-                          </div>
-
-                          <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-2">District <span class="text-red-500">*</span></label>
-                            <select v-model="form.district_id" @change="onDistrictChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                                <option value="" selected disabled>-- District --</option>  
-                                <option v-for="dist in districts" :key="dist.id" :value="dist.id">{{ dist.name }} - {{ dist.bn_name }}</option>                            
+                    <div>
+                      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-2">Division <span class="text-red-500">*</span></label>
+                            <select v-model="form.division_id" @change="onDivisionChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                                <option value="" selected disabled>-- Select Divison --</option>   
+                                <option v-for="val in divisions" :key="val.id" :value="val.id">{{ val.name }} - {{ val.bn_name }}</option>                               
                             </select>
+                        </div>
 
-                            <p v-if="form.district_id && districts.length === 0" class="mt-2 text-xs text-amber-600">
-                                No district found for this division.
-                            </p>
-                          </div>
+                        <div>
+                          <label class="block text-xs font-semibold text-slate-600 mb-2">District <span class="text-red-500">*</span></label>
+                          <select v-model="form.district_id" @change="onDistrictChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                              <option value="" selected disabled>-- District --</option>  
+                              <option v-for="dist in districts" :key="dist.id" :value="dist.id">{{ dist.name }} - {{ dist.bn_name }}</option>                            
+                          </select>
 
-                          <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-2">Upazila <span class="text-red-500">*</span></label>
-                            <select v-model="form.upazila_id" @change="onUpazilaChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                                <option value="" selected disabled>-- Select Upazila --</option>
-                                <option v-for="upa in upazilas" :key="upa.id" :value="upa.id">{{ upa.name }} - {{ upa.bn_name }}</option>
-                            </select>
+                          <p v-if="form.district_id && districts.length === 0" class="mt-2 text-xs text-amber-600">
+                              No district found for this division.
+                          </p>
+                        </div>
 
-                            <p v-if="form.upazila_id && upazilas.length === 0" class="mt-2 text-xs text-amber-600">
-                                No upazila found for this district.
-                            </p>
-                          </div>
+                        <div>
+                          <label class="block text-xs font-semibold text-slate-600 mb-2">Upazila <span class="text-red-500">*</span></label>
+                          <select v-model="form.upazila_id" @change="onUpazilaChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                              <option value="" selected disabled>-- Select Upazila --</option>
+                              <option v-for="upa in upazilas" :key="upa.id" :value="upa.id">{{ upa.name }} - {{ upa.bn_name }}</option>
+                          </select>
 
-                          <div v-if="policeStations.length > 0">
-                            <label class="block text-xs font-semibold text-slate-600 mb-2">Police Station</label>
-                            <select v-model="form.police_station_id" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                                <option value="" disabled>-- Select Subcategory --</option>
-                                <option v-for="ps in policeStations" :key="ps.id" :value="ps.id">{{ ps.name }} - {{ ps.bn_name }}</option>
-                            </select>
+                          <p v-if="form.upazila_id && upazilas.length === 0" class="mt-2 text-xs text-amber-600">
+                              No upazila found for this district.
+                          </p>
+                        </div>
 
-                            <p v-if="form.police_station_id && policeStations.length === 0" class="mt-2 text-xs text-amber-600">
-                                No police station found for this upazila.
-                            </p>
-                          </div>
+                        <div v-if="policeStations.length > 0">
+                          <label class="block text-xs font-semibold text-slate-600 mb-2">Police Station</label>
+                          <select v-model="form.police_station_id" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                              <option value="" disabled>-- Select Subcategory --</option>
+                              <option v-for="ps in policeStations" :key="ps.id" :value="ps.id">{{ ps.name }} - {{ ps.bn_name }}</option>
+                          </select>
+
+                          <p v-if="form.police_station_id && policeStations.length === 0" class="mt-2 text-xs text-amber-600">
+                              No police station found for this upazila.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        
+                        <div>
+                          <label class="block text-xs font-semibold text-slate-600 mb-2">Category <span class="text-red-500">*</span></label>
+                          <select v-model="form.category_id" @change="onCategoryChange" required class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="" selected disabled>-- Select Category --</option>
+                            <option v-for="val in categories" :key="val.id" :value="val.id">
+                              {{ val.name }} - {{ val.bn_name }}
+                            </option>
+                          </select>
+                        </div>
+                        <div>
+                          <label class="block text-xs font-semibold text-slate-600 mb-2">Sub-Category <span class="text-red-500">*</span></label>
+                          <select
+                            v-model="form.subcategory_id"
+                            :disabled="!form.category_id || subcategories.length === 0"
+                            required
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white
+                                  focus:outline-none focus:ring-2 focus:ring-indigo-500
+                                  disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+                            <option value="" selected disabled>
+                              {{ form.category_id ? '-- Select Sub-Category --' : 'Select category first' }}
+                            </option>
+                            <option v-for="val in subcategories" :key="val.id" :value="val.id">
+                              {{ val.name }} - {{ val.bn_name }}
+                            </option>
+                          </select>
+                          <p v-if="form.category_id && subcategories.length === 0" class="mt-2 text-xs text-amber-600">
+                            No sub-categories found for this category.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </form>
@@ -100,29 +135,48 @@ const districts = ref([]);
 const upazilas = ref([]);
 const policeStations = ref([]);
 
+const categories = ref([]);
+const subcategories = ref([]);
+
 const form = reactive({
   division_id: "",
   district_id: "",
   upazila_id: "",
   police_station_id: "",
+
+  category_id: "",
+  subcategory_id: "",
 });
 
 // form clear
 function resetForm() {
-    Object.assign(form, {
-        division_id: "",
-        district_id: "",
-        upazila_id: "",
-        policeStations: "",
-        // title: "",
-        // amount: "",
-        // remark: ""
-    })
+  Object.assign(form, {
+      division_id: "",
+      district_id: "",
+      upazila_id: "",
+      police_station_id: "",
 
-    // divisions.value = [];
-    districts.value = [];
-    upazilas.value = [];
-    policeStations.value = [];
+      category_id: "",
+      subcategory_id: "",
+      // title: "",
+      // amount: "",
+      // remark: ""
+  })
+
+  // master data reload
+  getDivision();
+  getCategory();
+
+  // divisions.value = [];
+  districts.value = [];
+  upazilas.value = [];
+  policeStations.value = [];
+
+  // categories.value = [];
+  subcategories.value = [];
+
+  errorMsg.value = "";
+  loading.value = false;
 }
 
 // ==============================
@@ -243,7 +297,49 @@ async function onUpazilaChange() {
   }
 }
 
+// get category
+async function getCategory() {
+  resetErrorAndLoading();
 
+  try {
+    const res = await api.get('/create/get-category');
+    categories.value = res.data?.data ?? [];
+    // console.log(categories.value)
+  } catch (err) {
+    console.error("Category load error:", err);
+    handleApiError(err, "Failed to load categories", categories);
+  } finally {
+    loading.value = false;
+  }
+}
+
+
+// get category wise subcategory
+async function onCategoryChange() {
+  resetErrorAndLoading();
+
+  // Reset dependent field
+  form.subcategory_id = "";
+
+  subcategories.value = [];
+
+  // No category selected
+  if (!form.category_id) {
+    loading.value = false;
+    return;
+  }
+
+  try {
+    const res = await api.get(`/create/get-subcategory/${form.category_id}`);
+    subcategories.value = res.data?.data ?? [];
+    // console.log(subcategories.value);
+  } catch (err) {
+    console.error("Subcategory load error:", err);
+    handleApiError(err, "Failed to load subcategories", subcategories);
+  } finally {
+    loading.value = false;
+  }
+}
 
 
 
@@ -287,6 +383,7 @@ onMounted(() => {
 
 
   getDivision();
+  getCategory();
 
   window.addEventListener("keydown", handleEsc);
 

@@ -9,6 +9,8 @@ use App\Models\Division;
 use App\Models\District;
 use App\Models\Upazila;
 use App\Models\PoliceStation;
+use App\Models\Category;
+use App\Models\Subcategory;
 
 class ComplainController extends Controller
 {
@@ -68,6 +70,36 @@ class ComplainController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'PoliceStation can not fetched.',
+            ], 500);
+        }
+    }
+
+    public function getCategory(){
+        try{
+            $categories = Category::all();
+            return response()->json([
+                'success' => true,
+                'data' => $categories
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category can not fetched.',
+            ], 500);
+        }
+    }
+
+    public function getSubcategory($id){
+        try{
+            $subcategorices = Subcategory::where('category_id', $id)->get();
+            return response()->json([
+                'success' => true,
+                'data' => $subcategorices,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Subcategory can not fetched.',
             ], 500);
         }
     }

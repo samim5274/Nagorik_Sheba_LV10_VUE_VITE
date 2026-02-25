@@ -24,9 +24,14 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::prefix('create')->group(function () {
+        // get location
         Route::get('/get-division', [ComplainController::class, 'getDivision']);
         Route::get('/get-district/{id}', [ComplainController::class, 'getDistrict']);
         Route::get('/get-upazila/{id}', [ComplainController::class, 'getUpazila']);
         Route::get('/get-policeStations/{id}', [ComplainController::class, 'getPoliceStations']);
+
+        // get category and sub category
+        Route::get('/get-category', [ComplainController::class, 'getCategory']);
+        Route::get('/get-subcategory/{id}', [ComplainController::class, 'getSubcategory']);
     });
 });

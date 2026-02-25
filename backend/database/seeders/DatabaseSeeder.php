@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
             DistrictSeeder::class,
             UpazilaSeeder::class,
             PoliceStationSeeder::class,
+
+            CategorySeeder::class,
+            SubcategorySeeder::class,
         ]);
     }
 }
