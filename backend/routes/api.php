@@ -33,5 +33,8 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
         // get category and sub category
         Route::get('/get-category', [ComplainController::class, 'getCategory']);
         Route::get('/get-subcategory/{id}', [ComplainController::class, 'getSubcategory']);
+
+        // create complaint
+        Route::post('/', [ComplainController::class, 'store']);
     });
 });

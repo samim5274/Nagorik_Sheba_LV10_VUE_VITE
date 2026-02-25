@@ -192,7 +192,7 @@
 
                           <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                             <div>
-                              <label class="mb-2 block text-xs font-semibold text-slate-600">Ward No</label>
+                              <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Ward No</label>
                               <input
                                 v-model="form.ward_no"
                                 type="text"
@@ -202,7 +202,7 @@
                             </div>
 
                             <div class="xl:col-span-2">
-                              <label class="mb-2 block text-xs font-semibold text-slate-600">Address Line</label>
+                              <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Address Line</label>
                               <input
                                 v-model="form.address_line"
                                 type="text"
@@ -212,7 +212,7 @@
                             </div>
 
                             <div class="md:col-span-2 xl:col-span-3">
-                              <label class="mb-2 block text-xs font-semibold text-slate-600">Landmark</label>
+                              <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Landmark</label>
                               <input
                                 v-model="form.landmark"
                                 type="text"
@@ -293,24 +293,46 @@
                               </select>
                             </div>
 
-                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                              <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 px-3 py-2.5">
-                                <input
-                                  v-model="form.is_public"
-                                  type="checkbox"
-                                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span class="text-sm text-slate-700 dark:text-indigo-100">Show publicly</span>
+                            <div>
+                              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">
+                                Visibility <span class="text-red-500">*</span>
                               </label>
 
-                              <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 px-3 py-2.5">
-                                <input
-                                  v-model="form.is_anonymous"
-                                  type="checkbox"
-                                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span class="text-sm text-slate-700 dark:text-indigo-100">Anonymous</span>
-                              </label>
+                              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <!-- Public -->
+                                <label
+                                  class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 px-3 py-2.5"
+                                  :class="visibilityMode === 'public' ? 'ring-2 ring-indigo-100 border-indigo-300' : ''"
+                                >
+                                  <input
+                                    v-model="visibilityMode"
+                                    type="radio"
+                                    value="public"
+                                    class="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                  />
+                                  <div>
+                                    <p class="text-sm font-medium text-slate-700 dark:text-indigo-100">Show publicly</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Complaint can be visible in public list</p>
+                                  </div>
+                                </label>
+
+                                <!-- Anonymous -->
+                                <label
+                                  class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 px-3 py-2.5"
+                                  :class="visibilityMode === 'anonymous' ? 'ring-2 ring-indigo-100 border-indigo-300' : ''"
+                                >
+                                  <input
+                                    v-model="visibilityMode"
+                                    type="radio"
+                                    value="anonymous"
+                                    class="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                  />
+                                  <div>
+                                    <p class="text-sm font-medium text-slate-700 dark:text-indigo-100">Anonymous</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Hide your identity in public view</p>
+                                  </div>
+                                </label>
+                              </div>
                             </div>
 
                             <div class="md:col-span-2">
@@ -409,8 +431,8 @@
                             </span>
                           </div>
 
-                          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
+                          <div class="grid grid-cols-1 gap-4">
+                            <!-- <div>
                               <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Primary Attachment</label>
                               <div class="rounded-xl border border-dashed border-slate-300 bg-white dark:bg-gray-900 p-3">
                                 <input
@@ -420,7 +442,7 @@
                                 />
                                 <p class="mt-2 text-xs text-slate-50 dark:text-slate-100">JPG, PNG, PDF (max size based on backend validation)</p>
                               </div>
-                            </div>
+                            </div> -->
 
                             <div>
                               <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Multiple Attachments</label>
@@ -446,7 +468,7 @@
                               <li v-if="form.attachment" class="flex items-center justify-between gap-2">
                                 <span class="truncate">Primary: {{ form.attachment.name }}</span>
                                 <button type="button" @click="form.attachment = null" class="text-red-600 hover:text-red-700">
-                                  Remove
+                                  <i class="fa-solid fa-circle-minus"></i>
                                 </button>
                               </li>
 
@@ -461,7 +483,7 @@
                                   @click="form.attachments.splice(index, 1)"
                                   class="text-red-600 hover:text-red-700"
                                 >
-                                  Remove
+                                  <i class="fa-solid fa-circle-minus"></i>
                                 </button>
                               </li>
                             </ul>
@@ -472,14 +494,50 @@
                             Map Coordinates
                         ========================== -->
                         <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
-                          <div class="mb-4 flex items-center justify-between gap-3">
+                          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 md:text-base">Map Coordinates</h3>
-                              <p class="text-xs text-slate-500">Optional GPS location if you know it</p>
+                              <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Optional GPS location. You can auto-fill using your current device location.
+                              </p>
                             </div>
-                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200">
-                              Optional
-                            </span>
+
+                            <div class="flex items-center gap-2">
+                              <!-- <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200 dark:border-slate-700">
+                                Optional
+                              </span> -->
+
+                              <button
+                                type="button"
+                                @click="getCurrentLocation"
+                                :disabled="locationLoading"
+                                class="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 dark:bg-indigo-950/30 dark:border-indigo-800 px-3 py-2 text-xs font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                <svg
+                                  v-if="locationLoading"
+                                  class="mr-2 h-4 w-4 animate-spin"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                </svg>
+                                <span v-else class="me-2"><i  class="fa-solid fa-location-crosshairs"></i></span>
+
+                                
+
+                                {{ locationLoading ? "Getting..." : "Get Current Location" }}
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- Optional local location error -->
+                          <div
+                            v-if="locationError"
+                            class="mb-4 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-300"
+                          >
+                            {{ locationError }}
                           </div>
 
                           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -487,10 +545,10 @@
                               <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Latitude</label>
                               <input
                                 v-model="form.latitude"
-                                type="number"
+                                type="number" readonly
                                 step="0.0000001"
-                                placeholder="23.8103"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="23.8103000"
+                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:border-slate-700 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -498,13 +556,17 @@
                               <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Longitude</label>
                               <input
                                 v-model="form.longitude"
-                                type="number"
+                                type="number" readonly
                                 step="0.0000001"
-                                placeholder="90.4125"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="90.4125000"
+                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:border-slate-700 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
                           </div>
+
+                          <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                            Tip: If location permission is denied, you can enter latitude and longitude manually.
+                          </p>
                         </section>
 
                         <!-- =========================
@@ -556,7 +618,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, onBeforeUnmount, reactive } from "vue";
+import { onMounted, ref, onBeforeUnmount, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
@@ -678,16 +740,11 @@ function resetComplaintForm() {
   subcategories.value = [];
 
   errorMsg.value = "";
-  successMsg.value = "";
-
-  // master data reload
-  getDivision();
-  getCategory();
 }
 
-function onSingleFileChange(e) {
-  form.attachment = e.target.files?.[0] || null;
-}
+// function onSingleFileChange(e) {
+//   form.attachment = e.target.files?.[0] || null;
+// }
 
 function onMultipleFilesChange(e) {
   form.attachments = Array.from(e.target.files || []);
@@ -856,10 +913,103 @@ async function onCategoryChange() {
 }
 
 
+const visibilityMode = ref("public"); // default
+
+watch(visibilityMode, (val) => {
+  if (val === "public") {
+    form.is_public = true;
+    form.is_anonymous = false;
+  } else if (val === "anonymous") {
+    form.is_public = true;      // public list এ থাকবে
+    form.is_anonymous = true;   // but identity hidden
+  }
+});
+
+const locationLoading = ref(false);
+const locationError = ref("");
+
+function getCurrentLocation() {
+  locationError.value = "";
+
+  if (!navigator.geolocation) {
+    locationError.value = "Geolocation is not supported by your browser.";
+    return;
+  }
+
+  locationLoading.value = true;
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      form.latitude = Number(position.coords.latitude).toFixed(7);
+      form.longitude = Number(position.coords.longitude).toFixed(7);
+      locationLoading.value = false;
+    },
+    (error) => {
+      locationLoading.value = false;
+
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          locationError.value = "Location permission denied. Please allow access or enter coordinates manually.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          locationError.value = "Location information is unavailable right now.";
+          break;
+        case error.TIMEOUT:
+          locationError.value = "Location request timed out. Please try again.";
+          break;
+        default:
+          locationError.value = "Failed to get current location.";
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+}
 
 
+async function submitComplaint(){
+  resetErrorAndLoading();
 
+  try {
+    const fd = new FormData();
 
+    // Normal fields
+    Object.entries(form).forEach(([key, value]) => {
+      if (key === "attachments") return; // handle separately
+
+      if (typeof value === "boolean") {
+        fd.append(key, value ? 1 : 0);
+      } else if (value !== null && value !== "") {
+        fd.append(key, value);
+      }
+    });
+
+    // Multiple attachments
+    if (form.attachments && form.attachments.length) {
+      form.attachments.forEach((file) => {
+        fd.append("attachments[]", file);
+      });
+    }
+
+    const res = await api.post("/create", fd, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    successMsg.value = res.data?.message || "Complaint submitted successfully.";
+
+    resetComplaintForm();
+  } catch (err) {
+    console.error("Complain error:", err);
+    handleApiError(err, "Failed to submit complain.");
+  } finally {
+    loading.value = false;
+  }
+}
 
 
 
@@ -898,6 +1048,7 @@ onMounted(() => {
 
   getDivision();
   getCategory();
+  getCurrentLocation();
 
   window.addEventListener("keydown", handleEsc);
 
