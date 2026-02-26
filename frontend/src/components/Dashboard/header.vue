@@ -151,8 +151,8 @@
                    dark:bg-slate-900 dark:text-slate-100 dark:border-white/10"
           >
             <div class="px-4 py-3 border-b border-slate-200 dark:border-white/10">
-              <div class="text-sm font-semibold">Samim</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">samim@example.com</div>
+              <div class="text-sm font-semibold">{{ authUser?.name || "Guest User" }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">{{ authUser?.email || "No email" }}</div>
             </div>
 
             <div class="py-2">
@@ -189,6 +189,41 @@ import { useRouter } from 'vue-router';
 import api from '../../services/api';
 
 const router = useRouter();
+
+
+
+
+const authUser = ref(null);
+const isLoggedIn = ref(false);
+
+async function loadAuthUser() {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      isLoggedIn.value = false;
+      authUser.value = null;
+      return;
+    }
+
+    const res = await api.get("/user");
+    authUser.value = res.data;
+    isLoggedIn.value = true;
+  } catch (err) {
+    // token invalid/expired হলে 401 আসবে
+    isLoggedIn.value = false;
+    authUser.value = null;
+    // optional: localStorage.removeItem("token");
+  }
+}
+
+
+
+
+
+
+
+
+
 
 defineProps({
   isDark: { type: Boolean, default: false },
@@ -257,6 +292,7 @@ function onKey(e) {
 }
 
 onMounted(() => {
+  loadAuthUser();
   document.addEventListener("click", onDocClick);
   window.addEventListener("keydown", onKey);
 });

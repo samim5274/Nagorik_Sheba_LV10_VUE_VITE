@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
+    <div class="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-200">
         <Header
             @open-sidebar="sidebarOpen = true"
             @search="onSearch"
@@ -26,63 +26,77 @@
 
                     <div v-else-if="complaint" class="space-y-6">
                         <!-- Header -->
-                        <div class="flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-700 md:flex-row md:items-start md:justify-between">
-                            <div class="space-y-2">
-                                <div class="flex flex-wrap items-center gap-2">
+                        <div class="border-b border-slate-200 pb-5 dark:border-slate-700">
+                            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                                <!-- Left side -->
+                                <div class="space-y-2">
                                     <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100 sm:text-2xl">
                                         {{ complaint.title }}
                                     </h1>
 
-                                    <span
-                                        class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize"
-                                        :class="{
-                                            'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200': complaint.priority === 'low',
-                                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300': complaint.priority === 'medium',
-                                            'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300': complaint.priority === 'high',
-                                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': complaint.priority === 'urgent'
-                                        }"
-                                    >
-                                        {{ complaint.priority }}
-                                    </span>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span
+                                            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize"
+                                            :class="{
+                                                'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200': complaint.priority === 'low',
+                                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300': complaint.priority === 'medium',
+                                                'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300': complaint.priority === 'high',
+                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': complaint.priority === 'urgent'
+                                            }"
+                                        >
+                                            {{ complaint.priority }}
+                                        </span>
 
-                                    <span
-                                        class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
-                                        :class="{
-                                            'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': complaint.status === 'pending',
-                                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': complaint.status === 'in_progress',
-                                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300': complaint.status === 'resolved',
-                                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': complaint.status === 'rejected',
-                                            'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200': complaint.status === 'closed',
-                                            'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300': complaint.status === 'assigned',
-                                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300': complaint.status === 'in_review',
-                                            'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300': complaint.status === 'on_hold'
-                                        }"
-                                    >
-                                        {{ formatStatus(complaint.status) }}
-                                    </span>
+                                        <span
+                                            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                                            :class="{
+                                                'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': complaint.status === 'pending',
+                                                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': complaint.status === 'in_progress',
+                                                'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300': complaint.status === 'resolved',
+                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': complaint.status === 'rejected',
+                                                'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200': complaint.status === 'closed',
+                                                'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300': complaint.status === 'assigned',
+                                                'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300': complaint.status === 'in_review',
+                                                'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300': complaint.status === 'on_hold'
+                                            }"
+                                        >
+                                            {{ formatStatus(complaint.status) }}
+                                        </span>
 
-                                    <span
-                                        v-if="complaint.is_anonymous"
-                                        class="inline-flex rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                                    >
-                                        Anonymous
-                                    </span>
+                                        <span
+                                            v-if="complaint.is_anonymous"
+                                            class="inline-flex rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                        >
+                                            Anonymous
+                                        </span>
 
-                                    <span
-                                        v-if="complaint.is_public"
-                                        class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                                    >
-                                        Public
-                                    </span>
+                                        <span
+                                            v-if="complaint.is_public"
+                                            class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                        >
+                                            Public
+                                        </span>
+                                    </div>
+
+                                    <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                        #{{ complaint.complaint_no || 'N/A' }}
+                                    </p>
+
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                                        Created: {{ formatDateTime(complaint.created_at) }}
+                                    </p>
                                 </div>
 
-                                <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                                    #{{ complaint.complaint_no || 'N/A' }}
-                                </p>
-
-                                <p class="text-sm text-slate-500 dark:text-slate-400">
-                                    Created: {{ formatDateTime(complaint.created_at) }}
-                                </p>
+                                <!-- Right side -->
+                                <div class="md:pt-1">
+                                    <button
+                                        @click="router.back()"
+                                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-300 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+                                    >
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                        Back
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -412,12 +426,14 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+
 import api, { makeImg } from "../../services/api";
 
 import Navbar from "../Dashboard/navbar.vue";
 import Header from "../Dashboard/header.vue";
 
+const router = useRouter();
 const complaint = ref(null);
 const loading = ref(false);
 const errorMsg = ref("");

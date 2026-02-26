@@ -127,6 +127,7 @@ const pagesOpen = ref(false);
 const routeMap = {
   dashboard: "/dashboard",
   create: "/create",
+  complainList: "/complain-list",
 };
 
 /* route দেখে active key */
@@ -174,7 +175,7 @@ const IconFolder = Icon(["M3 7h6l2 2h10v10H3V7"]);
 const mainItems = [
   { key: "dashboard", label: "Dashboard", icon: IconHome },
   { key: "create", label: "Create-Complain", icon: IconForms },
-  { key: "cards", label: "Cards", icon: IconCards },
+  { key: "complainList", label: "Complain-list", icon: IconCards },
   { key: "charts", label: "Charts", icon: IconCharts },
   { key: "buttons", label: "Buttons", icon: IconButtons },
   { key: "modals", label: "Modals", icon: IconModals },

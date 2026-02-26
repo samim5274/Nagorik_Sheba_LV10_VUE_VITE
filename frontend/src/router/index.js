@@ -5,6 +5,7 @@ import Register from '../components/Auth/register.vue'
 import dashboard from '../components/Dashboard/dashboard.vue'
 import createComplain from '../components/Complain/create-complain.vue'
 import complain from '../components/Complain/complain-view.vue'
+import complainList from '../components/Complain/complain-list.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -13,6 +14,7 @@ const routes = [
   { path: '/dashboard', component: dashboard, meta: { requiresAuth: true, title: "Dashboard" } },
   { path: '/create', component: createComplain, meta: { requiresAuth: true, title: "Create" } },
   { path: '/complaints/:id/:code', component: complain, meta: { requiresAuth: true, title: "Complain" } },
+  { path: '/complain-list', component: complainList, meta: { requiresAuth: true, title: "Complain-List" } },
 ]
 
 const router = createRouter({
