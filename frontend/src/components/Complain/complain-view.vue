@@ -437,7 +437,7 @@ async function getComplain() {
 
     try {
         const id = route.params.id;
-        const res = await api.get(`/get-complain/${id}`);
+        const res = await api.get(`/complaints/${id}`);
         complaint.value = res.data?.data ?? null;
         // console.log("Complaint:", complaint.value);
     } catch (err) {

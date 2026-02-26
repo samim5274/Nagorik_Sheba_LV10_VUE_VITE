@@ -22,7 +22,8 @@ class ComplainController extends Controller
 {
     public function index(){
         try{
-            $complaints = Complaint::with(['category','subCategory', 'division','district','upazila','policeStation'])->get();
+            $complaints = Complaint::with(['category','subCategory', 'division','district','upazila','policeStation'])
+            ->latest('id')->paginate(15);
             return response()->json([
                 'success' => true,
                 'message' => 'Get all complaints.',

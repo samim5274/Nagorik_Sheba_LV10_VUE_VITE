@@ -200,7 +200,7 @@
                         </div>
 
                         <!-- Table -->
-                        <div class="w-full overflow-x-auto">
+                        <div class="w-full overflow-x-auto max-h-[500px]">
                             <table class="w-full whitespace-nowrap">
                                 <!-- <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -213,7 +213,7 @@
                                     <tr
                                         v-for="complaint in complaints"
                                         :key="complaint.id" @click="viewComplaint(complaint)"
-                                        class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                        class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition hover:underline">
                                         
                                         <!-- Complaint Info -->
                                         <td class="px-4 py-4 align-top">
@@ -306,6 +306,68 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <!-- Pegination section -->
+                        <div class="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="text-xs text-slate-500">
+                                Showing
+                                <span class="font-semibold text-slate-700">{{ fromItem }}</span>
+                                –
+                                <span class="font-semibold text-slate-700">{{ toItem }}</span>
+                                of
+                                <span class="font-semibold text-slate-700">{{ total }}</span>
+                            </p>
+
+                            <div class="flex flex-wrap items-center justify-end gap-2">
+                                <!-- First -->
+                                <button
+                                    @click="getComplaints(1)"
+                                    :disabled="currentPage === 1 || loading"
+                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                    <i class="fa-solid fa-angles-left"></i>
+                                </button>
+
+                                <!-- Prev -->
+                                <button
+                                    @click="getComplaints(Math.max(1, currentPage - 1))"
+                                    :disabled="currentPage === 1 || loading"
+                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+
+                                <!-- Pages -->
+                                <button
+                                    v-for="page in visiblePages"
+                                    :key="String(page)"
+                                    :disabled="page === '...' || loading"
+                                    @click="page !== '...' && getComplaints(page)"
+                                    class="rounded-lg border px-3 py-1.5 text-xs font-semibold"
+                                    :class="[
+                                        page === '...'
+                                        ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
+                                        : currentPage === page
+                                            ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                                            : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
+                                    ]">
+                                    {{ page }}
+                                </button>
+
+                                <!-- Next -->
+                                <button
+                                    @click="getComplaints(Math.min(lastPage, currentPage + 1))"
+                                    :disabled="currentPage === lastPage || loading"
+                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                    <i class="fa-solid fa-angle-right"></i>
+                                </button>
+
+                                <!-- Last -->
+                                <button
+                                    @click="getComplaints(lastPage)"
+                                    :disabled="currentPage === lastPage || loading"
+                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                    <i class="fa-solid fa-angles-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -677,7 +739,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
@@ -726,28 +788,80 @@ function formatTime(date) {
 
 // view complaint
 function viewComplaint(complaint) {
-    // console.log("View complaint:", id);
-    router.push(`/complaints/${complaint.id}/${complaint.complaint_no}`);
+    if (!complaint?.id) return;
+    router.push(`/complaints/${complaint.id}/${complaint.complaint_no ?? ''}`);
 }
 
+// paginate section 
+const currentPage = ref(1);
+const lastPage = ref(1);
+const total = ref(0);
+const perPage = ref(20);
+const fromItem = ref(0);
+const toItem = ref(0);
+
+const visiblePages = computed(() => {
+    const pages = [];
+    const last = lastPage.value;
+    const cur = currentPage.value;
+
+    if (last <= 5) {
+        for (let i = 1; i <= last; i++) pages.push(i);
+        return pages;
+    }
+
+    pages.push(1);
+
+    if (cur > 3) pages.push("...");
+
+    const start = Math.max(2, cur - 1);
+    const end = Math.min(last - 1, cur + 1);
+
+    for (let i = start; i <= end; i++) {
+        pages.push(i);
+    }
+
+    if (cur < last - 2) pages.push("...");
+
+    pages.push(last);
+
+    return pages;
+});
+
 // get all public complaints
-async function getComplaints() {
+async function getComplaints(page = 1) {
     resetErrorAndLoading();
 
     try {
-        const res = await api.get("/get-public-complain");
-        complaints.value = res.data?.data ?? [];
-        // console.log("Complaints:", complaints.value);
+        const res = await api.get(`/complaints?page=${page}`);
+        const response = res.data?.data;
+
+        complaints.value = response?.data ?? [];
+        currentPage.value = response?.current_page ?? 1;
+        lastPage.value = response?.last_page ?? 1;
+        total.value = response?.total ?? 0;
+        perPage.value = response?.per_page ?? 20;
+        fromItem.value = response?.from ?? 0;
+        toItem.value = response?.to ?? 0;
+
+        // console.log("API Response:", res.data);
     } catch (err) {
         console.error("complaints load error:", err);
         handleApiError(err, "Failed to load complaints", complaints);
+
+        complaints.value = [];
+        currentPage.value = 1;
+        lastPage.value = 1;
+        total.value = 0;
+        fromItem.value = 0;
+        toItem.value = 0;
     } finally {
         loading.value = false;
     }
 }
 
 onMounted(() => {
-    getComplaints();
+    getComplaints(1);
 });
 </script>
 

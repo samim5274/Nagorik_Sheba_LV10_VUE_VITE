@@ -7,12 +7,12 @@
   />
 
   <aside
-    class="fixed inset-y-0 left-0 z-50 w-72 h-screen
-           border-r transform transition-transform duration-200
-           lg:static lg:translate-x-0 lg:h-screen
-           overflow-y-auto
-           bg-white text-slate-900 border-slate-200
-           dark:bg-slate-900 dark:text-slate-100 dark:border-white/10"
+    class="fixed inset-y-0 left-0 z-50 w-72
+      border-r transform transition-transform duration-200
+      lg:static lg:translate-x-0 lg:h-auto
+      overflow-y-auto
+      bg-white text-slate-900 border-slate-200
+      dark:bg-slate-900 dark:text-slate-100 dark:border-white/10"
     :class="open ? 'translate-x-0' : '-translate-x-full'"
   >
     <!-- Brand -->
