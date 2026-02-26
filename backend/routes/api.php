@@ -23,6 +23,10 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
     // Common Routes
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // public complaint
+    Route::get('/get-public-complain', [ComplainController::class, 'index']);
+    Route::get('/get-complain/{id}', [ComplainController::class, 'show']);
+
     Route::prefix('create')->group(function () {
         // get location
         Route::get('/get-division', [ComplainController::class, 'getDivision']);

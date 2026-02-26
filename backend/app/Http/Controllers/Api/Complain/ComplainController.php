@@ -20,6 +20,48 @@ use App\Models\Complaint;
 
 class ComplainController extends Controller
 {
+    public function index(){
+        try{
+            $complaints = Complaint::with(['category','subCategory', 'division','district','upazila','policeStation'])->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Get all complaints.',
+                'data' => $complaints
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Division can not fetched.',
+            ], 500);
+        }
+    }
+
+    public function show($id){
+        try{
+            $complaint = Complaint::
+                with(['category','subCategory', 'division','district','upazila','policeStation'])->find($id);
+
+            if (!$complaint) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Complaint not found.',
+                    'data' => null
+                ], 404);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Get specific complaint.',
+                'data' => $complaint
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Complaint can not fetched.',
+            ], 500);
+        }
+    }
+
     public function getDivision(){
         try{
             $division = Division::all();
@@ -120,13 +162,16 @@ class ComplainController extends Controller
             // Visibility mapping (frontend radio => visibilityMode / visibility_mode)
             $visibilityMode = $request->input('visibility_mode', $request->input('visibilityMode'));
 
-            if ($visibilityMode) {
-                $data['is_public'] = $visibilityMode === 'public';
-                $data['is_anonymous'] = $visibilityMode === 'anonymous';
+            if ($visibilityMode === 'anonymous') {
+                $data['is_public'] = false;
+                $data['is_anonymous'] = true;
+            } elseif ($visibilityMode === 'public') {
+                $data['is_public'] = true;
+                $data['is_anonymous'] = false;
             } else {
                 // fallback if directly booleans sent
-                $data['is_public'] = (bool)($data['is_public'] ?? true);
-                $data['is_anonymous'] = (bool)($data['is_anonymous'] ?? false);
+                $data['is_public'] = (bool) ($data['is_public'] ?? true);
+                $data['is_anonymous'] = (bool) ($data['is_anonymous'] ?? false);
             }
 
             // Complaint no generate

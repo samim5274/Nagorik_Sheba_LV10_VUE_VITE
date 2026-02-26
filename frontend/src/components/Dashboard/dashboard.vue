@@ -37,7 +37,7 @@ const router = useRouter();
 const isDark = ref(false);
 
 function applyTheme(dark) {
-  isDark.value = dark;   // 🔥 VERY IMPORTANT
+  isDark.value = dark;   // VERY IMPORTANT
   document.documentElement.classList.toggle("dark", dark);
   localStorage.setItem("theme", dark ? "dark" : "light");
 }

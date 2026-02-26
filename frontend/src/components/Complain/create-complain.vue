@@ -367,7 +367,7 @@
                         <!-- =========================
                             Complainant Info
                         ========================== -->
-                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5 hidden">
                           <div class="mb-4 flex items-center justify-between gap-3">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 md:text-base">Complainant Information</h3>
@@ -386,7 +386,7 @@
                               <input
                                 v-model="form.complainant_name"
                                 type="text"
-                                required
+                                required readonly
                                 placeholder="Enter your full name"
                                 class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
@@ -399,7 +399,7 @@
                               <input
                                 v-model="form.complainant_phone"
                                 type="tel"
-                                required
+                                required readonly
                                 placeholder="01XXXXXXXXX"
                                 class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
@@ -409,7 +409,7 @@
                               <label class="mb-2 block text-xs font-semibold text-slate-600 dark:text-slate-100">Email (Optional)</label>
                               <input
                                 v-model="form.complainant_email"
-                                type="email"
+                                type="email" readonly
                                 placeholder="you@example.com"
                                 class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
@@ -628,6 +628,8 @@ import Message from '../Message/message.vue'
 
 const router = useRouter();
 
+const authUser = ref(null);
+const isLoggedIn = ref(false);
 const loading = ref(false);
 const errorMsg = ref("");
 const successMsg = ref("");
@@ -920,7 +922,7 @@ watch(visibilityMode, (val) => {
     form.is_public = true;
     form.is_anonymous = false;
   } else if (val === "anonymous") {
-    form.is_public = true;      // public list এ থাকবে
+    form.is_public = false;      // public list এ থাকবে
     form.is_anonymous = true;   // but identity hidden
   }
 });
@@ -1013,6 +1015,31 @@ async function submitComplaint(){
 
 
 
+async function loadAuthUser() {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      isLoggedIn.value = false;
+      authUser.value = null;
+      return;
+    }
+
+    const res = await api.get("/user");
+    authUser.value = res.data;
+    isLoggedIn.value = true;
+
+    // default set (only if empty)
+    if (!form.complainant_name) form.complainant_name = authUser.value?.name || "";
+    if (!form.complainant_phone) form.complainant_phone = authUser.value?.phone || authUser.value?.mobile || "";
+    if (!form.complainant_email) form.complainant_email = authUser.value?.email || "";
+  } catch (err) {
+    // token invalid/expired হলে 401 আসবে
+    isLoggedIn.value = false;
+    authUser.value = null;
+    // optional: localStorage.removeItem("token");
+  }
+}
+
 
 
 
@@ -1044,7 +1071,7 @@ function handleEsc(e) {
 
 /* ESC to close drawer */
 onMounted(() => {
-
+  loadAuthUser();
 
   getDivision();
   getCategory();

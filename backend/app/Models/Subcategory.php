@@ -25,4 +25,9 @@ class Subcategory extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function complain()
+    {
+        return $this->hasMany(Complaint::class, 'sub_category_id');
+    }
 }
