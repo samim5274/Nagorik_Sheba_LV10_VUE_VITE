@@ -191,7 +191,10 @@
                             >
                                 <option value="">All Status</option>
                                 <option value="pending">Pending</option>
+                                <option value="in_review">In Review</option>
+                                <option value="assigned">Assigned</option>
                                 <option value="in_progress">In Progress</option>
+                                <option value="on_hold">On Hold</option>
                                 <option value="resolved">Resolved</option>
                                 <option value="rejected">Rejected</option>
                                 <option value="closed">Closed</option>

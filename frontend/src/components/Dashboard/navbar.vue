@@ -128,13 +128,21 @@ const routeMap = {
   dashboard: "/dashboard",
   create: "/create",
   complainList: "/complain-list",
+  mycomplain: "/my-complain"
 };
 
 /* route দেখে active key */
+const routeMatch = [
+  { key: "mycomplain", prefixes: ["/complaints/view", "/my-complain"] },
+  { key: "complainList", prefixes: ["/complaints", "/complain-list"] },
+  { key: "create", prefixes: ["/create"] },
+  { key: "dashboard", prefixes: ["/dashboard"] },
+];
+
 const activeKey = computed(() => {
   const path = route.path;
-  const found = Object.entries(routeMap).find(([, p]) => p === path);
-  return found ? found[0] : "dashboard";
+  const hit = routeMatch.find(r => r.prefixes.some(pre => path.startsWith(pre)));
+  return hit?.key ?? "dashboard";
 });
 
 /* click: update + navigate + close (mobile) */
@@ -174,10 +182,10 @@ const IconFolder = Icon(["M3 7h6l2 2h10v10H3V7"]);
 
 const mainItems = [
   { key: "dashboard", label: "Dashboard", icon: IconHome },
-  { key: "create", label: "Create-Complain", icon: IconForms },
+  { key: "mycomplain", label: "My-Complain", icon: IconForms },
   { key: "complainList", label: "Complain-list", icon: IconCards },
   { key: "charts", label: "Charts", icon: IconCharts },
-  { key: "buttons", label: "Buttons", icon: IconButtons },
+  { key: "create", label: "Create-Complain", icon: IconButtons },
   { key: "modals", label: "Modals", icon: IconModals },
   { key: "tables", label: "Tables", icon: IconTables },
 ];

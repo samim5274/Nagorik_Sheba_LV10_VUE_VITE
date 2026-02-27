@@ -18,7 +18,7 @@
                 <!-- Top bar (Title + optional actions/search) -->
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 py-4">Public Complains</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 py-4">My Complains</h1>
                         <p class="text-sm text-gray-700 dark:text-slate-300"></p>
                     </div>
                 </div>
@@ -34,24 +34,24 @@
 
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                             <input
+                                v-model.trim="searchComplaintNo"
                                 type="text"
                                 placeholder="Search complaint..."
                                 class="w-full sm:w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
 
-                            <select
-                                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                                <option value="">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="in_review">In Review</option>
-                                <option value="assigned">Assigned</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="on_hold">On Hold</option>
-                                <option value="resolved">Resolved</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="closed">Closed</option>
-                            </select>
+                                <select v-model="statusFilter" @change="getComplaints(1)"
+                                    class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in_review">In Review</option>
+                                    <option value="assigned">Assigned</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="on_hold">On Hold</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="closed">Closed</option>
+                                </select>
                             </div>
                         </div>
 
@@ -61,15 +61,15 @@
                                 <tbody class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
                                     <tr
                                         v-for="complaint in complaints"
-                                        :key="complaint.id" @click="viewComplaint(complaint)"
-                                        class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition hover:underline">
+                                        :key="complaint.id"
+                                        class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                         
                                         <!-- Complaint Info -->
-                                        <td class="px-4 py-4 align-top">
+                                        <td class="px-4 py-4 align-top" @click="viewComplaint(complaint)">
                                             <div class="space-y-1">
                                                 <div class="flex items-center gap-2">
                                                     <p class="font-semibold text-slate-800 dark:text-slate-100">
-                                                        {{ complaint.title }} - 
+                                                        <span class="hover:underline">{{ complaint.title }}</span> - 
                                                         <span
                                                             class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
                                                             :class="{
@@ -96,14 +96,14 @@
                                                     </p>
 
                                                     <span
-                                                    v-if="complaint.is_anonymous"
-                                                    class="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                                                    >
-                                                    Anonymous
+                                                        v-if="complaint.is_anonymous"
+                                                        class="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                                        >
+                                                        Anonymous
                                                     </span>
                                                 </div>
 
-                                                <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                                                <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
                                                     #{{ complaint.complaint_no || 'N/A' }}
                                                 </p>
 
@@ -143,6 +143,24 @@
                                                 <p class="truncate max-w-[180px]">
                                                     {{ complaint.address_line || 'No address' }}
                                                 </p>
+                                            </div>
+                                        </td>
+
+                                        <!-- Action -->
+                                        <td class="px-4 py-4 align-top">
+                                            <div class="flex items-center gap-2">
+                                                <!-- Delete -->
+                                                <button
+                                                    @click.stop="deleteComplain(complaint)"
+                                                    type="button"
+                                                    class="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5
+                                                        text-xs font-semibold text-rose-700 shadow-sm transition
+                                                        hover:bg-rose-100 hover:border-rose-300
+                                                        focus:outline-none focus:ring-2 focus:ring-rose-500/40
+                                                        dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-300 dark:hover:bg-rose-900/30">
+                                                    <i class="fa-regular fa-trash-can text-[12px]"></i>
+                                                    Delete
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -226,7 +244,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
@@ -256,6 +274,28 @@ function handleApiError(err, fallbackMessage, targetRef) {
 
 
 
+// search on
+const searchComplaintNo = ref("");
+let searchTimer = null;
+
+function onSearchInput() {
+    // debounce (typing থামলে 400ms পরে call)
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        getComplaints(1); // search করলে always page 1
+    }, 400);
+}
+
+const statusFilter = ref("");
+
+// searchComplaintNo পরিবর্তন হলে auto search
+watch(
+    () => searchComplaintNo.value,
+    () => onSearchInput(),
+    // shorting
+    () => statusFilter.value, 
+    () => getComplaints(1)
+);
 
 
 
@@ -327,7 +367,14 @@ async function getComplaints(page = 1) {
     resetErrorAndLoading();
 
     try {
-        const res = await api.get(`/complaints?page=${page}`);
+
+        const params = new URLSearchParams();
+        params.set("page", String(page));
+
+        if (searchComplaintNo.value) params.set("complaint_no", searchComplaintNo.value);
+        if (statusFilter.value) params.set("status", statusFilter.value);
+
+        const res = await api.get(`/complaints/view?${params.toString()}`);
         const response = res.data?.data;
 
         complaints.value = response?.data ?? [];
@@ -355,8 +402,31 @@ async function getComplaints(page = 1) {
 }
 
 
+function deleteComplain(complain){
+    if (!complain?.id) return;
 
+    const ok = window.confirm(`Are you sure you want to delete complaint #${complain.complaint_no ?? complain.id}?`);
+    if (!ok) return;
 
+    loading.value = true;
+    errorMsg.value = "";
+    successMsg.value = "";
+    
+    try{
+        const res = api.delete(`/complaints/delete/${complain.id}`);
+        successMsg.value = res.data?.message || "Complaint deleted successfully.";
+
+        // list থেকে remove (instant UI update)
+        complaints.value = complaints.value.filter(c => c.id !== complain.id);
+        // pagination total update (optional)
+        total.value = Math.max(0, total.value - 1);
+    } catch (err) {
+        console.error("complaints delete error:", err);
+        handleApiError(err, "Failed to delete complaints", complaints);
+    } finally {
+        loading.value = false;
+    }
+}
 
 
 

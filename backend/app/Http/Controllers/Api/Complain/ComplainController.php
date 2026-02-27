@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Complain;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -32,7 +33,7 @@ class ComplainController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Division can not fetched.',
+                'message' => 'Complaints can not fetched.',
             ], 500);
         }
     }
@@ -300,5 +301,106 @@ class ComplainController extends Controller
             str_contains($ua, 'opr') || str_contains($ua, 'opera') => 'Opera',
             default => 'Unknown',
         };
+    }
+
+    public function myComplain(Request $request){
+        try{
+            $query = Complaint::with([
+                'category',
+                'subCategory',
+                'division',
+                'district',
+                'upazila',
+                'policeStation',
+            ])
+            ->where('user_id', auth()->id());
+
+            // complaint_no search
+            if ($request->filled('complaint_no')) {
+                $q = trim($request->complaint_no);
+                $query->where('complaint_no', 'like', "%{$q}%");
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+            
+            // Alphabetical order ভালো লাগে না। Custom order চাইলে এটা
+            // if ($request->input('sort_by') === 'status') {
+            //     $dir = strtolower($request->input('sort_dir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
+
+            //     $query->orderByRaw("
+            //         FIELD(status,
+            //             'pending',
+            //             'assigned',
+            //             'in_review',
+            //             'in_progress',
+            //             'on_hold',
+            //             'resolved',
+            //             'rejected',
+            //             'closed'
+            //         ) $dir
+            //     ");
+            // } else {
+            //     $query->latest('id');
+            // }
+
+            $perPage = (int) $request->input('per_page', 20);
+            
+            $complaints = $query->latest('id')->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Get all complaints.',
+                'data'    => $complaints,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Complain can not fetched.',
+            ], 500);
+        }
+    }
+
+    public function delete($id){
+        try{
+            $complaint = Complaint::where('id', $id)->where('user_id', auth()->id())->first();
+
+            if (!$complaint) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Complaint not found.',
+                ], 404);
+            }
+
+            DB::transaction(function () use ($complaint) {
+                // 1) Delete dependent rows first (FK constraint prevent করবে)
+                // $complaint->statusLogs()->delete();
+                // $complaint->comments()->delete();
+                // $complaint->attachmentsList()->delete();
+                // $complaint->editLogs()->delete();
+                // $complaint->activityLogs()->delete();
+
+                // 2) Now permanent delete (এখানেই model deleting event trigger হবে)
+                $complaint->forceDelete();
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Complaint deleted successfully.',
+                'data'    => ['id' => $id],
+            ], 200);
+        } catch (\Throwable $e) {
+            \Log::error('Complaint force delete failed', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Complaint could not be deleted.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
 }

@@ -725,9 +725,9 @@ function resetComplaintForm() {
   form.latitude = "";
   form.longitude = "";
 
-  form.complainant_name = "";
-  form.complainant_phone = "";
-  form.complainant_email = "";
+  // form.complainant_name = "";
+  // form.complainant_phone = "";
+  // form.complainant_email = "";
 
   form.is_public = true;
   form.is_anonymous = false;

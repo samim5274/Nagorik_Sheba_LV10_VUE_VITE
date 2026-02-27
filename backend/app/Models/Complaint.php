@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Complaint extends Model
 {
@@ -76,6 +77,26 @@ class Complaint extends Model
         'is_spam' => 'boolean',
         'is_duplicate' => 'boolean',
     ];
+
+
+    protected static function booted()
+    {
+        // Only after successful force delete
+        static::forceDeleted(function ($complaint) {
+
+            foreach (($complaint->attachments ?? []) as $att) {
+                $path = $att['path'] ?? $att['file_path'] ?? $att['file_name'] ?? null;
+                if (!$path) continue;
+
+                $path = ltrim($path, '/');
+                if (str_starts_with($path, 'storage/')) {
+                    $path = substr($path, strlen('storage/'));
+                }
+
+                \Storage::disk('public')->delete($path);
+            }
+        });
+    }
 
     /*
     |--------------------------------------------------------------------------
