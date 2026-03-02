@@ -10,160 +10,63 @@
                 </div>
 
                 <!-- Optional: right side button -->
-                <div class="flex items-center gap-3">
+                <!-- <div class="flex items-center gap-3">
                     <button class="rounded-xl px-4 py-2 text-sm font-semibold bg-slate-200 dark:bg-white/10 
                     dark:text-white border border-white/10 hover:bg-white/15 transition">Export</button>
-                </div>
+                </div> -->
             </div>
 
             <!-- Cards Grid -->
-            <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+                <div
+                    v-for="card in statusCards"
+                    :key="card.key"
+                    data-aos="fade-up"
+                    class="group relative overflow-hidden rounded-2xl bg-white/95 dark:bg-slate-900
+                        border border-slate-200/60 dark:border-slate-700
+                        shadow-md hover:shadow-xl transition-all duration-300 p-6">
 
-            <!-- Card -->
-            <div
-                data-aos="fade-up"
-                class="group relative overflow-hidden rounded-2xl
-                    bg-white/95 dark:bg-slate-900
-                    border border-slate-200/60 dark:border-slate-700
-                    shadow-md hover:shadow-xl
-                    transition-all duration-300 p-6">
-                <div class="flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                    Total Complaints
-                </h2>
+                    <!-- Soft glow -->
+                    <div class="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl opacity-40" :class="card.glow"></div>
 
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl
-                            bg-amber-100 dark:bg-amber-500/20
-                            text-amber-600 dark:text-amber-400">
-                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
-                </div>
-                </div>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                                {{ card.title }}
+                            </h2>
 
-                <div class="mt-6">
-                <h3 class="text-3xl font-bold text-slate-900 dark:text-white">150</h3>
+                        <div
+                            class="h-10 w-10 flex items-center justify-center rounded-xl"
+                            :class="card.iconWrap">
+                            <i :class="card.icon + ' text-lg'"></i>
+                        </div>
+                    </div>
 
-                <p class="mt-2 flex items-center text-sm font-medium text-green-600 dark:text-green-400">
-                    <i class="fa-solid fa-arrow-trend-up mr-2"></i>
-                    +12% from last month
-                </p>
-                </div>
+                    <div class="mt-6">
+                        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">
+                            {{ card.value }}
+                        </h3>
 
-                <div class="mt-6">
-                <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full
-                            bg-slate-100 dark:bg-slate-800
-                            text-slate-700 dark:text-slate-300
-                            border border-slate-200 dark:border-slate-600">
-                    <span class="h-2 w-2 rounded-full bg-green-500"></span>
-                    Complaint Records
-                </span>
-                </div>
-            </div>
+                        <p v-if="card.subtext" class="mt-2 flex items-center text-sm font-medium" :class="card.subtextClass">
+                            <i :class="card.subIcon + ' mr-2'"></i>
+                            {{ card.subtext }}
+                        </p>
 
-            <!-- Card 2 -->
-            <div data-aos="fade-up"
-                class="group relative overflow-hidden rounded-2xl
-                    bg-white/95 dark:bg-slate-900
-                    border border-slate-200/60 dark:border-slate-700
-                    shadow-md hover:shadow-xl
-                    transition-all duration-300 p-6">
-                <div class="flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Pending</h2>
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl
-                            bg-orange-100 dark:bg-orange-500/20
-                            text-orange-600 dark:text-orange-400">
-                    <i class="fa-solid fa-clock text-lg"></i>
-                </div>
-                </div>
+                        <p v-else class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                            Updated just now
+                        </p>
+                    </div>
 
-                <div class="mt-6">
-                <h3 class="text-3xl font-bold text-slate-900 dark:text-white">36</h3>
-                <p class="mt-2 flex items-center text-sm font-medium text-orange-600 dark:text-orange-400">
-                    <i class="fa-solid fa-arrow-trend-up mr-2"></i>
-                    +5% this week
-                </p>
+                    <div class="mt-6">
+                        <span
+                            class="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full
+                                bg-slate-100 dark:bg-slate-800
+                                text-slate-700 dark:text-slate-300
+                                border border-slate-200 dark:border-slate-600">
+                            <span class="h-2 w-2 rounded-full" :class="card.dot"></span>
+                            {{ card.pill }}
+                        </span>
+                    </div>
                 </div>
-
-                <div class="mt-6">
-                <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full
-                            bg-slate-100 dark:bg-slate-800
-                            text-slate-700 dark:text-slate-300
-                            border border-slate-200 dark:border-slate-600">
-                    <span class="h-2 w-2 rounded-full bg-orange-500"></span>
-                    Waiting for action
-                </span>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div data-aos="fade-up"
-                class="group relative overflow-hidden rounded-2xl
-                    bg-white/95 dark:bg-slate-900
-                    border border-slate-200/60 dark:border-slate-700
-                    shadow-md hover:shadow-xl
-                    transition-all duration-300 p-6">
-                <div class="flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Resolved</h2>
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl
-                            bg-emerald-100 dark:bg-emerald-500/20
-                            text-emerald-700 dark:text-emerald-400">
-                    <i class="fa-solid fa-circle-check text-lg"></i>
-                </div>
-                </div>
-
-                <div class="mt-6">
-                <h3 class="text-3xl font-bold text-slate-900 dark:text-white">114</h3>
-                <p class="mt-2 flex items-center text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                    <i class="fa-solid fa-arrow-trend-up mr-2"></i>
-                    +18% from last month
-                </p>
-                </div>
-
-                <div class="mt-6">
-                <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full
-                            bg-slate-100 dark:bg-slate-800
-                            text-slate-700 dark:text-slate-300
-                            border border-slate-200 dark:border-slate-600">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    Completed
-                </span>
-                </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div data-aos="fade-up"
-                class="group relative overflow-hidden rounded-2xl
-                    bg-white/95 dark:bg-slate-900
-                    border border-slate-200/60 dark:border-slate-700
-                    shadow-md hover:shadow-xl
-                    transition-all duration-300 p-6">
-                <div class="flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Today New</h2>
-                <div class="h-10 w-10 flex items-center justify-center rounded-xl
-                            bg-sky-100 dark:bg-sky-500/20
-                            text-sky-700 dark:text-sky-400">
-                    <i class="fa-solid fa-bolt text-lg"></i>
-                </div>
-                </div>
-
-                <div class="mt-6">
-                <h3 class="text-3xl font-bold text-slate-900 dark:text-white">9</h3>
-                <p class="mt-2 flex items-center text-sm font-medium text-sky-700 dark:text-sky-400">
-                    <i class="fa-solid fa-arrow-trend-up mr-2"></i>
-                    +2 since morning
-                </p>
-                </div>
-
-                <div class="mt-6">
-                <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium rounded-full
-                            bg-slate-100 dark:bg-slate-800
-                            text-slate-700 dark:text-slate-300
-                            border border-slate-200 dark:border-slate-600">
-                    <span class="h-2 w-2 rounded-full bg-sky-500"></span>
-                    Fresh complaints
-                </span>
-                </div>
-            </div>
-
             </div>
         </div>
 
@@ -203,7 +106,7 @@
                         </div> -->
 
                         <!-- List -->
-                        <div class="w-full overflow-x-auto max-h-[500px] mb-3">
+                        <div class="w-full overflow-x-auto max-h-[950px] mb-3">
                             <div class="space-y-3">
                                 <!-- Items -->
                                 <article
@@ -384,7 +287,7 @@
                 <div class="xl:col-span-4 bg-gray-50 dark:bg-[#0c1326] border dark:border-slate-700 rounded-md p-3 text-white">
                     <h4 class="pb-2">My Complain</h4>
                     <!-- <p class="text-xs text-red-500">Count: {{ myComplaints.length }}</p> -->
-                    <div class="w-full overflow-hidden rounded-lg shadow-xs">
+                    <div class="w-full overflow-x-auto max-h-[950px] mb-3">
                         <div class="w-full overflow-x-auto">
                             <div class="space-y-3">
                                 <!-- List items -->
@@ -507,68 +410,68 @@
                                     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Try changing filters or create a new complaint.</p>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Pegination section -->
-                        <div class="flex flex-col gap-2 border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                            <p class="text-xs text-slate-500">
-                                Showing
-                                <span class="font-semibold text-slate-700">{{ fromItem }}</span>
-                                –
-                                <span class="font-semibold text-slate-700">{{ toItem }}</span>
-                                of
-                                <span class="font-semibold text-slate-700">{{ total }}</span>
-                            </p>
+                        </div>                        
+                    </div>
+                    <!-- Pegination section -->
+                    <div class="flex flex-col gap-2 border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs text-slate-500">
+                            Showing
+                            <span class="font-semibold text-slate-700">{{ fromItem }}</span>
+                            –
+                            <span class="font-semibold text-slate-700">{{ toItem }}</span>
+                            of
+                            <span class="font-semibold text-slate-700">{{ total }}</span>
+                        </p>
 
-                            <div class="flex flex-wrap items-center justify-end gap-2">
-                                <!-- First -->
-                                <button
-                                    @click="getMyComplaints(1)"
-                                    :disabled="currentPage === 1 || loading"
-                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
-                                    <i class="fa-solid fa-angles-left"></i>
-                                </button>
+                        <div class="flex flex-wrap items-center justify-end gap-2">
+                            <!-- First -->
+                            <button
+                                @click="getMyComplaints(1)"
+                                :disabled="currentPage === 1 || loading"
+                                class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                <i class="fa-solid fa-angles-left"></i>
+                            </button>
 
-                                <!-- Prev -->
-                                <button
-                                    @click="getMyComplaints(Math.max(1, currentPage - 1))"
-                                    :disabled="currentPage === 1 || loading"
-                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </button>
+                            <!-- Prev -->
+                            <button
+                                @click="getMyComplaints(Math.max(1, currentPage - 1))"
+                                :disabled="currentPage === 1 || loading"
+                                class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
 
-                                <!-- Pages -->
-                                <button
-                                    v-for="page in visiblePages"
-                                    :key="String(page)"
-                                    :disabled="page === '...' || loading"
-                                    @click="page !== '...' && getMyComplaints(page)"
-                                    class="rounded-lg border px-3 py-1.5 text-xs font-semibold"
-                                    :class="[
-                                        page === '...'
-                                        ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
-                                        : currentPage === page
-                                            ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                                            : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
-                                    ]">
-                                    {{ page }}
-                                </button>
+                            <!-- Pages -->
+                            <button
+                                v-for="page in visiblePages"
+                                :key="String(page)"
+                                :disabled="page === '...' || loading"
+                                @click="page !== '...' && getMyComplaints(page)"
+                                class="rounded-lg border px-3 py-1.5 text-xs font-semibold"
+                                :class="[
+                                    page === '...'
+                                    ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
+                                    : currentPage === page
+                                        ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                                        : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
+                                ]">
+                                {{ page }}
+                            </button>
 
-                                <!-- Next -->
-                                <button
-                                    @click="getMyComplaints(Math.min(lastPage, currentPage + 1))"
-                                    :disabled="currentPage === lastPage || loading"
-                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
-                                    <i class="fa-solid fa-angle-right"></i>
-                                </button>
+                            <!-- Next -->
+                            <button
+                                @click="getMyComplaints(Math.min(lastPage, currentPage + 1))"
+                                :disabled="currentPage === lastPage || loading"
+                                class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                <i class="fa-solid fa-angle-right"></i>
+                            </button>
 
-                                <!-- Last -->
-                                <button
-                                    @click="getMyComplaints(lastPage)"
-                                    :disabled="currentPage === lastPage || loading"
-                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
-                                    <i class="fa-solid fa-angles-right"></i>
-                                </button>
-                            </div>
+                            <!-- Last -->
+                            <button
+                                @click="getMyComplaints(lastPage)"
+                                :disabled="currentPage === lastPage || loading"
+                                class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+                                <i class="fa-solid fa-angles-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -762,9 +665,153 @@ async function getMyComplaints(page = 1) {
     }
 }
 
+const stats = ref({
+    pending: 0,
+    in_progress: 0,
+    resolved: 0,
+    rejected: 0,
+    closed: 0,
+    assigned: 0,
+    in_review: 0,
+    on_hold: 0,
+    today_new: 0,
+});
+
+async function getStats() {
+    try {
+        const res = await api.get("/complaints/stats");
+        stats.value = res.data?.data ?? stats.value;
+    } catch (e) {
+        console.error("Stats load error:", e);
+    }
+}
+
+const statusCards = computed(() => [
+    // Extra Card: Today New
+    {
+        key: "today_new",
+        title: "Today New",
+        value: stats.value.today_new,
+        icon: "fa-solid fa-bolt",
+        iconWrap: "bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400",
+        glow: "bg-sky-400/30 dark:bg-sky-500/20",
+        dot: "bg-sky-500",
+        pill: "Fresh complaints",
+        subIcon: "fa-solid fa-sun",
+        subtext: "Created today",
+        subtextClass: "text-sky-700 dark:text-sky-400",
+    },
+
+    {
+        key: "pending",
+        title: "Pending",
+        value: stats.value.pending,
+        icon: "fa-solid fa-clock",
+        iconWrap: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400",
+        glow: "bg-amber-400/30 dark:bg-amber-500/20",
+        dot: "bg-amber-500",
+        pill: "Waiting for action",
+        subIcon: "fa-solid fa-hourglass-half",
+        subtext: "Needs review",
+        subtextClass: "text-amber-700 dark:text-amber-400",
+    },
+    {
+        key: "in_progress",
+        title: "In Progress",
+        value: stats.value.in_progress,
+        icon: "fa-solid fa-spinner",
+        iconWrap: "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400",
+        glow: "bg-blue-400/30 dark:bg-blue-500/20",
+        dot: "bg-blue-500",
+        pill: "Work ongoing",
+        subIcon: "fa-solid fa-screwdriver-wrench",
+        subtext: "Processing now",
+        subtextClass: "text-blue-700 dark:text-blue-400",
+    },
+    {
+        key: "resolved",
+        title: "Resolved",
+        value: stats.value.resolved,
+        icon: "fa-solid fa-circle-check",
+        iconWrap: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400",
+        glow: "bg-emerald-400/30 dark:bg-emerald-500/20",
+        dot: "bg-emerald-500",
+        pill: "Completed",
+        subIcon: "fa-solid fa-check",
+        subtext: "Successfully solved",
+        subtextClass: "text-emerald-700 dark:text-emerald-400",
+    },
+    {
+        key: "rejected",
+        title: "Rejected",
+        value: stats.value.rejected,
+        icon: "fa-solid fa-circle-xmark",
+        iconWrap: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400",
+        glow: "bg-red-400/30 dark:bg-red-500/20",
+        dot: "bg-red-500",
+        pill: "Not accepted",
+        subIcon: "fa-solid fa-ban",
+        subtext: "Needs correction",
+        subtextClass: "text-red-700 dark:text-red-400",
+    },
+    {
+        key: "closed",
+        title: "Closed",
+        value: stats.value.closed,
+        icon: "fa-solid fa-lock",
+        iconWrap: "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200",
+        glow: "bg-slate-400/30 dark:bg-slate-500/20",
+        dot: "bg-slate-500",
+        pill: "Finalized",
+        subIcon: "fa-solid fa-shield",
+        subtext: "Archived",
+        subtextClass: "text-slate-700 dark:text-slate-300",
+    },
+    {
+        key: "assigned",
+        title: "Assigned",
+        value: stats.value.assigned,
+        icon: "fa-solid fa-user-check",
+        iconWrap: "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400",
+        glow: "bg-indigo-400/30 dark:bg-indigo-500/20",
+        dot: "bg-indigo-500",
+        pill: "Assigned to officer",
+        subIcon: "fa-solid fa-user-gear",
+        subtext: "Owner set",
+        subtextClass: "text-indigo-700 dark:text-indigo-400",
+    },
+    {
+        key: "in_review",
+        title: "In Review",
+        value: stats.value.in_review,
+        icon: "fa-solid fa-magnifying-glass",
+        iconWrap: "bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400",
+        glow: "bg-purple-400/30 dark:bg-purple-500/20",
+        dot: "bg-purple-500",
+        pill: "Under review",
+        subIcon: "fa-solid fa-clipboard-check",
+        subtext: "Verification running",
+        subtextClass: "text-purple-700 dark:text-purple-400",
+    },
+    {
+        key: "on_hold",
+        title: "On Hold",
+        value: stats.value.on_hold,
+        icon: "fa-solid fa-pause",
+        iconWrap: "bg-pink-100 dark:bg-pink-500/20 text-pink-700 dark:text-pink-400",
+        glow: "bg-pink-400/30 dark:bg-pink-500/20",
+        dot: "bg-pink-500",
+        pill: "Paused temporarily",
+        subIcon: "fa-solid fa-circle-pause",
+        subtext: "Waiting info",
+        subtextClass: "text-pink-700 dark:text-pink-400",
+    },
+]);
+
 onMounted(() => {
     getComplaints(1);
     getMyComplaints(1);
+    getStats();
 });
 </script>
 

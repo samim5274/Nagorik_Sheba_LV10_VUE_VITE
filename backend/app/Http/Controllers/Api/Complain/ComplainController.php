@@ -403,4 +403,50 @@ class ComplainController extends Controller
             ], 500);
         }
     }
+
+    public function stats(): JsonResponse{
+        $userId = auth()->id();
+
+        // today range (server timezone)
+        $todayStart = now()->startOfDay();
+        $todayEnd   = now()->endOfDay();
+
+        // Status list (ensure same as your frontend)
+        $statuses = [
+            'pending', 'in_progress', 'resolved', 'rejected',
+            'closed', 'assigned', 'in_review', 'on_hold'
+        ];
+
+        // One query to get counts by status
+        $byStatus = Complaint::query()
+            ->where('user_id', $userId)
+            ->whereIn('status', $statuses)
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status'); // returns like ['pending' => 10, ...]
+
+        // Today new complaints
+        $todayNew = Complaint::query()
+            // ->where('user_id', $userId)
+            ->whereBetween('created_at', [$todayStart, $todayEnd])
+            ->count();
+
+        // Build response with defaults 0
+        $data = [
+            'pending'     => (int)($byStatus['pending'] ?? 0),
+            'in_progress' => (int)($byStatus['in_progress'] ?? 0),
+            'resolved'    => (int)($byStatus['resolved'] ?? 0),
+            'rejected'    => (int)($byStatus['rejected'] ?? 0),
+            'closed'      => (int)($byStatus['closed'] ?? 0),
+            'assigned'    => (int)($byStatus['assigned'] ?? 0),
+            'in_review'   => (int)($byStatus['in_review'] ?? 0),
+            'on_hold'     => (int)($byStatus['on_hold'] ?? 0),
+            'today_new'   => (int)$todayNew,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
 }

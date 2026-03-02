@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
     Route::prefix('complaints')->group(function () {
         Route::get('/', [ComplainController::class, 'index']);
         Route::get('/view', [ComplainController::class, 'myComplain']);
+        Route::get('/stats', [ComplainController::class, 'stats']);
         Route::get('/{id}', [ComplainController::class, 'show'])->whereNumber('id');
         Route::delete('/delete/{id}', [ComplainController::class, 'delete'])->whereNumber('id');
     });
