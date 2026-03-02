@@ -36,30 +36,29 @@
                         <!-- Table Header Area -->
                         <div class="flex flex-col gap-3 border-b border-slate-200 dark:border-slate-700 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                            <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">Complaint List</h2>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Manage and monitor all submitted complaints</p>
+                                <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">Complaint List</h2>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Manage and monitor all submitted complaints</p>
                             </div>
 
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <input
-                                type="text"
-                                placeholder="Search complaint..."
-                                class="w-full sm:w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
+                                <input v-model="searchComplaintNo"
+                                    type="text"
+                                    placeholder="Search complaint..."
+                                    class="w-full sm:w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
 
-                            <select
-                                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                                <option value="">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="in_review">In Review</option>
-                                <option value="assigned">Assigned</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="on_hold">On Hold</option>
-                                <option value="resolved">Resolved</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="closed">Closed</option>
-                            </select>
+                                <select @change="getComplaints(1)" v-model="statusFilter"
+                                    class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in_review">In Review</option>
+                                    <option value="assigned">Assigned</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="on_hold">On Hold</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="closed">Closed</option>
+                                </select>
                             </div>
                         </div>
 
@@ -70,14 +69,14 @@
                                     <tr
                                         v-for="complaint in complaints"
                                         :key="complaint.id" @click="viewComplaint(complaint)"
-                                        class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition hover:underline">
+                                        class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                         
                                         <!-- Complaint Info -->
                                         <td class="px-4 py-4 align-top">
                                             <div class="space-y-1">
                                                 <div class="flex items-center gap-2">
                                                     <p class="font-semibold text-slate-800 dark:text-slate-100">
-                                                        {{ complaint.title }} - 
+                                                        <span class="hover:underline hover:cursor-pointer">{{ complaint.title }}</span> - 
                                                         <span
                                                             class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
                                                             :class="{
@@ -89,29 +88,20 @@
                                                             >
                                                             {{ complaint.priority }}
                                                         </span> - 
-                                                        <span
-                                                            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
-                                                            :class="{
-                                                                'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': complaint.status === 'pending',
-                                                                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300': complaint.status === 'in_progress',
-                                                                'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300': complaint.status === 'resolved',
-                                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': complaint.status === 'rejected',
-                                                                'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200': complaint.status === 'closed'
-                                                            }"
-                                                            >
-                                                            {{ complaint.status }}
+                                                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold capitalize" :class="statusBadge(complaint.status)">
+                                                            <span class="h-1.5 w-1.5 rounded-full" :class="statusDot(complaint.status)"></span>
+                                                            {{ formatStatus(complaint.status) }}
                                                         </span>
                                                     </p>
 
                                                     <span
-                                                    v-if="complaint.is_anonymous"
-                                                    class="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                                                    >
-                                                    Anonymous
+                                                        v-if="complaint.is_anonymous"
+                                                        class="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                                                        Anonymous
                                                     </span>
                                                 </div>
 
-                                                <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                                                <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline hover:cursor-pointer">
                                                     #{{ complaint.complaint_no || 'N/A' }}
                                                 </p>
 
@@ -234,7 +224,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
@@ -264,6 +254,17 @@ function handleApiError(err, fallbackMessage, targetRef) {
 
 
 
+// search
+const searchComplaintNo = ref("");
+const statusFilter = ref("");
+let searchTimer = null;
+
+watch([searchComplaintNo, statusFilter], () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        getComplaints(1);
+    }, 400);
+});
 
 
 
@@ -335,7 +336,13 @@ async function getComplaints(page = 1) {
     resetErrorAndLoading();
 
     try {
-        const res = await api.get(`/complaints?page=${page}`);
+        const params = new URLSearchParams();
+        params.set("page", String(page));
+
+        if (searchComplaintNo.value) params.set("complaint_no", searchComplaintNo.value);
+        if (statusFilter.value) params.set("status", statusFilter.value);
+
+        const res = await api.get(`/complaints?${params.toString()}`);
         const response = res.data?.data;
 
         complaints.value = response?.data ?? [];
@@ -363,7 +370,54 @@ async function getComplaints(page = 1) {
 }
 
 
+function formatStatus(status) {
+    if (!status) return "N/A";
+    return status.replaceAll("_", " ");
+}
 
+function statusBadge(status) {
+    const s = (status || "").toLowerCase();
+
+    if (s === "pending")
+        return "bg-amber-100 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:ring-amber-800/60";
+
+    if (s === "in_progress")
+        return "bg-blue-100 text-blue-800 ring-1 ring-blue-200 dark:bg-blue-900/30 dark:text-blue-200 dark:ring-blue-800/60";
+
+    if (s === "resolved")
+        return "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:ring-emerald-800/60";
+
+    if (s === "rejected")
+        return "bg-red-100 text-red-800 ring-1 ring-red-200 dark:bg-red-900/30 dark:text-red-200 dark:ring-red-800/60";
+
+    if (s === "closed")
+        return "bg-slate-200 text-slate-800 ring-1 ring-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600";
+
+    // extra statuses (optional)
+    if (s === "assigned")
+        return "bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-200 dark:ring-indigo-800/60";
+
+    if (s === "in_review")
+        return "bg-purple-100 text-purple-800 ring-1 ring-purple-200 dark:bg-purple-900/30 dark:text-purple-200 dark:ring-purple-800/60";
+
+    if (s === "on_hold")
+        return "bg-pink-100 text-pink-800 ring-1 ring-pink-200 dark:bg-pink-900/30 dark:text-pink-200 dark:ring-pink-800/60";
+
+    return "bg-slate-100 text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700";
+}
+
+function statusDot(status) {
+    const s = (status || "").toLowerCase();
+    if (s === "pending") return "bg-amber-500";
+    if (s === "in_progress") return "bg-blue-500";
+    if (s === "resolved") return "bg-emerald-500";
+    if (s === "rejected") return "bg-red-500";
+    if (s === "closed") return "bg-slate-500";
+    if (s === "assigned") return "bg-indigo-500";
+    if (s === "in_review") return "bg-purple-500";
+    if (s === "on_hold") return "bg-pink-500";
+    return "bg-slate-400";
+}
 
 
 

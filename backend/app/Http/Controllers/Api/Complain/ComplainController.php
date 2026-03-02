@@ -21,10 +21,30 @@ use App\Models\Complaint;
 
 class ComplainController extends Controller
 {
-    public function index(){
+    public function index(Request $request){
         try{
-            $complaints = Complaint::with(['category','subCategory', 'division','district','upazila','policeStation'])
-            ->latest('id')->paginate(15);
+            $query = Complaint::with(['category','subCategory','division','district','upazila','policeStation'])
+                ->latest('id');
+
+            // Search: complaint_no বা title
+            if ($request->filled('complaint_no')) {
+                $term = trim($request->complaint_no);
+
+                $query->where(function ($q) use ($term) {
+                    $q->where('complaint_no', 'like', "%{$term}%")
+                    ->orWhere('title', 'like', "%{$term}%");
+                    // ->orWhere('description', 'like', "%{$term}%"); // চাইলে
+                });
+            }
+
+            // Status filter
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // paginate (page param auto handle করে)
+            $complaints = $query->paginate(15);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Get all complaints.',
