@@ -25,7 +25,7 @@
                     <!-- <button
                         type="button"
                         @click="resetComplaintForm"
-                        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        class="rounded-xl border border-slate-200 dark:border-slate-500 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                         >
                         Reset
                     </button> -->
@@ -33,14 +33,14 @@
 
                 <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                   <!-- Page Header -->
-                  <div class="mb-6 rounded-2xl border border-slate-200 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
+                  <div class="mb-6 rounded-2xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <div class="flex items-center gap-2">
                           <span class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 dark:bg-slate-600 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-100">
                             নাগরিক সেবা
                           </span>
-                          <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 dark:bg-slate-600 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-indigo-100">
+                          <span class="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-500 bg-slate-100 dark:bg-slate-600 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-indigo-100">
                             Complaint Portal
                           </span>
                         </div>
@@ -53,11 +53,11 @@
                       </div>
 
                       <div class="grid grid-cols-2 gap-2 sm:w-auto">
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center">
+                        <div class="rounded-xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center">
                           <p class="text-xs text-slate-500 dark:text-slate-100">Status</p>
                           <p class="text-sm font-semibold text-slate-700 dark:text-slate-100">Open</p>
                         </div>
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center">
+                        <div class="rounded-xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center">
                           <p class="text-xs text-slate-500 dark:text-slate-100">Channel</p>
                           <p class="text-sm font-semibold text-slate-700 dark:text-slate-100">Web</p>
                         </div>
@@ -66,8 +66,8 @@
                   </div>
 
                   <!-- Main Form Card -->
-                  <div class="rounded-2xl border border-slate-200 bg-white dark:bg-slate-900 shadow-sm">
-                    <div class="border-b border-slate-100 px-4 py-3 sm:px-6">
+                  <div class="rounded-2xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-900 shadow-sm">
+                    <div class="border-b border-slate-200 dark:border-slate-500 px-4 py-3 sm:px-6">
                       <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-100">Complaint Submission Form</h2>
                     </div>
 
@@ -91,13 +91,13 @@
                         <!-- =========================
                             Location Section
                         ========================== -->
-                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+                        <section class="rounded-2xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
                           <div class="mb-4 flex items-center justify-between gap-3">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 md:text-base">Location Information</h3>
                               <p class="text-xs text-slate-500">Select complaint area and address</p>
                             </div>
-                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200">
+                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200 dark:border-slate-500">
                               Required first
                             </span>
                           </div>
@@ -112,7 +112,7 @@
                                 v-model="form.division_id"
                                 @change="onDivisionChange"
                                 required
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
                                 <option value="" disabled>-- Select Division --</option>
                                 <option v-for="val in divisions" :key="val.id" :value="val.id">
@@ -131,7 +131,7 @@
                                 @change="onDistrictChange"
                                 :disabled="!form.division_id"
                                 required
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                               >
                                 <option value="" disabled>
                                   {{ form.division_id ? '-- Select District --' : 'Select division first' }}
@@ -155,7 +155,7 @@
                                 @change="onUpazilaChange"
                                 :disabled="!form.district_id"
                                 required
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                               >
                                 <option value="" disabled>
                                   {{ form.district_id ? '-- Select Upazila --' : 'Select district first' }}
@@ -175,7 +175,7 @@
                               <select
                                 v-model="form.police_station_id"
                                 :disabled="!form.upazila_id || policeStations.length === 0"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                               >
                                 <option value="" disabled>
                                   {{ form.upazila_id ? '-- Select Police Station --' : 'Select upazila first' }}
@@ -197,7 +197,7 @@
                                 v-model="form.ward_no"
                                 type="text"
                                 placeholder="e.g. 07"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -207,7 +207,7 @@
                                 v-model="form.address_line"
                                 type="text"
                                 placeholder="House, road, village / area"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -217,7 +217,7 @@
                                 v-model="form.landmark"
                                 type="text"
                                 placeholder="Near school / market / bridge (optional)"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
                           </div>
@@ -226,13 +226,13 @@
                         <!-- =========================
                             Complaint Details
                         ========================== -->
-                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+                        <section class="rounded-2xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
                           <div class="mb-4 flex items-center justify-between gap-3">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-white md:text-base">Complaint Details</h3>
                               <p class="text-xs text-slate-500">Category, title, description and priority</p>
                             </div>
-                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-slate-800 dark:text-white px-2.5 py-1 text-xs text-slate-500 border border-slate-200">
+                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-slate-800 dark:text-white px-2.5 py-1 text-xs text-slate-500 border border-slate-200 dark:border-slate-500">
                               Main issue info
                             </span>
                           </div>
@@ -246,7 +246,7 @@
                                 v-model="form.category_id"
                                 @change="onCategoryChange"
                                 required
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
                                 <option value="" disabled>-- Select Category --</option>
                                 <option v-for="val in categories" :key="val.id" :value="val.id">
@@ -263,7 +263,7 @@
                                 v-model="form.sub_category_id"
                                 :disabled="!form.category_id || subcategories.length === 0"
                                 required
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                               >
                                 <option value="" disabled>
                                   {{ form.category_id ? '-- Select Sub-Category --' : 'Select category first' }}
@@ -284,7 +284,7 @@
                               <select
                                 v-model="form.priority"
                                 required
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               >
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
@@ -301,7 +301,7 @@
                               <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <!-- Public -->
                                 <label
-                                  class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 px-3 py-2.5"
+                                  class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 px-3 py-2.5"
                                   :class="visibilityMode === 'public' ? 'ring-2 ring-indigo-100 border-indigo-300' : ''"
                                 >
                                   <input
@@ -318,7 +318,7 @@
 
                                 <!-- Anonymous -->
                                 <label
-                                  class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white dark:bg-slate-800 px-3 py-2.5"
+                                  class="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 px-3 py-2.5"
                                   :class="visibilityMode === 'anonymous' ? 'ring-2 ring-indigo-100 border-indigo-300' : ''"
                                 >
                                   <input
@@ -345,7 +345,7 @@
                                 required
                                 maxlength="255"
                                 placeholder="Short summary of your complaint"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -358,7 +358,7 @@
                                 required
                                 rows="5"
                                 placeholder="Write details of the problem, when it started, and what support you need..."
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-800 dark:text-white px-3 py-2.5 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               ></textarea>
                             </div>
                           </div>
@@ -367,13 +367,13 @@
                         <!-- =========================
                             Complainant Info
                         ========================== -->
-                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5 hidden">
+                        <section class="rounded-2xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-900 p-4 md:p-5 hidden">
                           <div class="mb-4 flex items-center justify-between gap-3">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 md:text-base">Complainant Information</h3>
                               <p class="text-xs text-slate-500">Your contact details for update and follow-up</p>
                             </div>
-                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-slate-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200">
+                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-slate-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200 dark:border-slate-500">
                               Contact info
                             </span>
                           </div>
@@ -388,7 +388,7 @@
                                 type="text"
                                 required readonly
                                 placeholder="Enter your full name"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -401,7 +401,7 @@
                                 type="tel"
                                 required readonly
                                 placeholder="01XXXXXXXXX"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -411,7 +411,7 @@
                                 v-model="form.complainant_email"
                                 type="email" readonly
                                 placeholder="you@example.com"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-gray-900 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
                           </div>
@@ -420,13 +420,13 @@
                         <!-- =========================
                             Attachments
                         ========================== -->
-                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+                        <section class="rounded-2xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
                           <div class="mb-4 flex items-center justify-between gap-3">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 md:text-base">Attachments</h3>
                               <p class="text-xs text-slate-500">Upload photo, document or evidence</p>
                             </div>
-                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200">
+                            <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200 dark:border-slate-500">
                               Optional
                             </span>
                           </div>
@@ -460,7 +460,7 @@
 
                           <div
                             v-if="form.attachment || (form.attachments && form.attachments.length)"
-                            class="mt-4 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 p-3"
+                            class="mt-4 rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-900 p-3"
                           >
                             <p class="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-100">Selected files</p>
 
@@ -493,7 +493,7 @@
                         <!-- =========================
                             Map Coordinates
                         ========================== -->
-                        <section class="rounded-2xl border border-slate-200 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
+                        <section class="rounded-2xl border border-slate-200 dark:border-slate-500 bg-slate-50 dark:bg-slate-900 p-4 md:p-5">
                           <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                               <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 md:text-base">Map Coordinates</h3>
@@ -503,7 +503,7 @@
                             </div>
 
                             <div class="flex items-center gap-2">
-                              <!-- <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200 dark:border-slate-700">
+                              <!-- <span class="hidden sm:inline-flex rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs text-slate-500 dark:text-slate-100 border border-slate-200 dark:border-slate-500 dark:border-slate-700">
                                 Optional
                               </span> -->
 
@@ -548,7 +548,7 @@
                                 type="number" readonly
                                 step="0.0000001"
                                 placeholder="23.8103000"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:border-slate-700 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-gray-900 dark:border-slate-700 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
 
@@ -559,7 +559,7 @@
                                 type="number" readonly
                                 step="0.0000001"
                                 placeholder="90.4125000"
-                                class="w-full rounded-xl border border-slate-200 bg-white dark:bg-gray-900 dark:border-slate-700 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="w-full rounded-xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-gray-900 dark:border-slate-700 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
                             </div>
                           </div>
@@ -572,7 +572,7 @@
                         <!-- =========================
                             Submit Actions
                         ========================== -->
-                        <div class="sticky bottom-0 z-10 rounded-2xl border border-slate-200 bg-white dark:bg-slate-900 p-3 backdrop-blur md:p-4">
+                        <div class="sticky bottom-0 z-10 rounded-2xl border border-slate-200 dark:border-slate-500 bg-white dark:bg-slate-900 p-3 backdrop-blur md:p-4">
                           <div class="flex flex-col-reverse items-stretch justify-between gap-3 sm:flex-row sm:items-center">
                             <div class="text-xs text-slate-500 dark:text-slate-100">
                               <span class="text-red-500">*</span> Required fields must be completed before submission.
