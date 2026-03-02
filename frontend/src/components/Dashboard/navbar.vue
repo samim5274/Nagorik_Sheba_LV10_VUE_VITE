@@ -184,10 +184,10 @@ const mainItems = [
   { key: "dashboard", label: "Dashboard", icon: IconHome },
   { key: "mycomplain", label: "My-Complain", icon: IconForms },
   { key: "complainList", label: "Complains", icon: IconCards },
-  { key: "charts", label: "Charts", icon: IconCharts },
+  // { key: "charts", label: "Charts", icon: IconCharts },
   { key: "create", label: "Create complain", icon: IconButtons },
-  { key: "modals", label: "Modals", icon: IconModals },
-  { key: "tables", label: "Tables", icon: IconTables },
+  // { key: "modals", label: "Modals", icon: IconModals },
+  // { key: "tables", label: "Tables", icon: IconTables },
 ];
 
 const pageItems = [

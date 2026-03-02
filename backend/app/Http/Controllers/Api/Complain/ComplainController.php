@@ -345,7 +345,7 @@ class ComplainController extends Controller
             //     $query->latest('id');
             // }
 
-            $perPage = (int) $request->input('per_page', 20);
+            $perPage = (int) $request->input('per_page', 15);
             
             $complaints = $query->latest('id')->paginate($perPage);
 
@@ -364,7 +364,7 @@ class ComplainController extends Controller
 
     public function delete($id){
         try{
-            $complaint = Complaint::where('id', $id)->where('user_id', auth()->id())->first();
+            $complaint = Complaint::where('status', 'pending')->where('id', $id)->where('user_id', auth()->id())->first();
 
             if (!$complaint) {
                 return response()->json([
