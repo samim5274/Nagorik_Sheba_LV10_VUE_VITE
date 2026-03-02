@@ -207,6 +207,14 @@
                                             </p>
                                         </div>                                        
                                     </div>
+                                    <div>                                        
+                                        <div class="sm:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden mt-3">
+                                            <div v-if="hasCoords" ref="mapEl" class="h-60 w-full"></div>
+                                            <div v-else class="p-4 text-sm text-slate-500 dark:text-slate-400">
+                                                Location not available.
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Admin Info -->
@@ -296,15 +304,6 @@
                                             <p class="mt-1 text-sm text-slate-800 dark:text-slate-100 break-all">
                                                 {{ complaint.complainant_email || 'N/A' }}
                                             </p>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400">Location</p>
-                                            <div class="sm:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden mt-3">
-                                                <div v-if="hasCoords" ref="mapEl" class="h-60 w-full"></div>
-                                                <div v-else class="p-4 text-sm text-slate-500 dark:text-slate-400">
-                                                    Location not available.
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>                                    
                                 </div>

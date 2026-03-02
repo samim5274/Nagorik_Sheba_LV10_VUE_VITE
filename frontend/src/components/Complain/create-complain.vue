@@ -535,8 +535,7 @@
                           <!-- Optional local location error -->
                           <div
                             v-if="locationError"
-                            class="mb-4 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-300"
-                          >
+                            class="mb-4 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
                             {{ locationError }}
                           </div>
 
@@ -567,6 +566,27 @@
                           <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
                             Tip: If location permission is denied, you can enter latitude and longitude manually.
                           </p>
+
+                          <!-- map show -->
+                          <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div ref="pickerMapEl" class="h-72 w-full"></div>
+                          </div>
+
+                          <div class="mt-3 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              @click="openInGoogleMaps"
+                              :disabled="!hasFormCoords"
+                              class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                            >
+                              <i class="fa-brands fa-google"></i>
+                              Open in Google Maps
+                            </button>
+
+                            <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                              Map এ click করলে location set হবে, marker টেনে ঠিক করতে পারবে।
+                            </p>
+                          </div>
                         </section>
 
                         <!-- =========================
@@ -618,7 +638,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref, onBeforeUnmount, reactive, watch } from "vue";
+import { onMounted, ref, onBeforeUnmount, reactive, watch, computed, nextTick } from "vue";
+import L from "leaflet";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
@@ -915,6 +936,81 @@ async function onCategoryChange() {
 }
 
 
+
+
+// get google map show
+const pickerMapEl = ref(null);
+let pickerMap = null;
+let pickerMarker = null;
+
+// form.latitude/longitude string/number যাই হোক safe parse
+const formLat = computed(() => {
+  const n = Number(form.latitude);
+  return Number.isFinite(n) ? n : null;
+});
+const formLng = computed(() => {
+  const n = Number(form.longitude);
+  return Number.isFinite(n) ? n : null;
+});
+
+const hasFormCoords = computed(() => formLat.value !== null && formLng.value !== null);
+
+function setFormCoords(lat, lng) {
+  // input type=number হলেও v-model string হতে পারে, তাই fixed করে দিচ্ছি
+  form.latitude = Number(lat).toFixed(7);
+  form.longitude = Number(lng).toFixed(7);
+}
+
+function initPickerMap() {
+  if (!pickerMapEl.value) return;
+
+  // default Dhaka (fallback)
+  const startLat = formLat.value ?? 23.8103;
+  const startLng = formLng.value ?? 90.4125;
+
+  pickerMap = L.map(pickerMapEl.value).setView([startLat, startLng], 13);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(pickerMap);
+
+  // marker draggable
+  pickerMarker = L.marker([startLat, startLng], { draggable: true }).addTo(pickerMap);
+
+  // map click => move marker + set form
+  pickerMap.on("click", (e) => {
+    const { lat, lng } = e.latlng;
+    pickerMarker.setLatLng([lat, lng]);
+    setFormCoords(lat, lng);
+  });
+
+  // marker drag end => set form
+  pickerMarker.on("dragend", () => {
+    const p = pickerMarker.getLatLng();
+    setFormCoords(p.lat, p.lng);
+  });
+
+  // container size issue fix
+  setTimeout(() => pickerMap?.invalidateSize(), 150);
+}
+
+function syncMarkerToForm() {
+  if (!pickerMap || !pickerMarker || !hasFormCoords.value) return;
+  pickerMarker.setLatLng([formLat.value, formLng.value]);
+  pickerMap.setView([formLat.value, formLng.value], 15);
+}
+
+function openInGoogleMaps() {
+  if (!hasFormCoords.value) return;
+  window.open(`https://www.google.com/maps/search/?api=1&query=${formLat.value},${formLng.value}`, "_blank");
+}
+
+
+
+
+
+
+
 const visibilityMode = ref("public"); // default
 
 watch(visibilityMode, (val) => {
@@ -1076,6 +1172,8 @@ onMounted(() => {
   getDivision();
   getCategory();
   getCurrentLocation();
+  // map
+  nextTick(() => initPickerMap());
 
   window.addEventListener("keydown", handleEsc);
 
@@ -1091,6 +1189,16 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", handleEsc);
+
+  if (pickerMap) {
+    pickerMap.remove();
+    pickerMap = null;
+    pickerMarker = null;
+  }
+});
+
+watch([formLat, formLng], () => {
+  nextTick(() => syncMarkerToForm());
 });
 </script>
 
