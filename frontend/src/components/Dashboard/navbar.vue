@@ -183,9 +183,9 @@ const IconFolder = Icon(["M3 7h6l2 2h10v10H3V7"]);
 const mainItems = [
   { key: "dashboard", label: "Dashboard", icon: IconHome },
   { key: "mycomplain", label: "My-Complain", icon: IconForms },
-  { key: "complainList", label: "Complain-list", icon: IconCards },
+  { key: "complainList", label: "Complains", icon: IconCards },
   { key: "charts", label: "Charts", icon: IconCharts },
-  { key: "create", label: "Create-Complain", icon: IconButtons },
+  { key: "create", label: "Create complain", icon: IconButtons },
   { key: "modals", label: "Modals", icon: IconModals },
   { key: "tables", label: "Tables", icon: IconTables },
 ];

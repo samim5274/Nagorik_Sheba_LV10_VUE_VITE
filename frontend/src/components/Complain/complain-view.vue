@@ -205,7 +205,7 @@
                                             <p class="mt-1 text-sm text-slate-800 dark:text-slate-100">
                                                 {{ complaint.longitude || 'N/A' }}
                                             </p>
-                                        </div>
+                                        </div>                                        
                                     </div>
                                 </div>
 
@@ -297,7 +297,16 @@
                                                 {{ complaint.complainant_email || 'N/A' }}
                                             </p>
                                         </div>
-                                    </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Location</p>
+                                            <div class="sm:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden mt-3">
+                                                <div v-if="hasCoords" ref="mapEl" class="h-60 w-full"></div>
+                                                <div v-else class="p-4 text-sm text-slate-500 dark:text-slate-400">
+                                                    Location not available.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                                    
                                 </div>
 
                                 <!-- Submission -->
@@ -425,20 +434,21 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import L from "leaflet";
 import api, { makeImg } from "../../services/api";
+
+const router = useRouter();
+const route = useRoute();
 
 import Navbar from "../Dashboard/navbar.vue";
 import Header from "../Dashboard/header.vue";
 
-const router = useRouter();
 const complaint = ref(null);
 const loading = ref(false);
 const errorMsg = ref("");
 
-const route = useRoute();
 const sidebarOpen = ref(false);
 const isDark = ref(false);
 
@@ -464,6 +474,45 @@ async function getComplain() {
     }
 }
 
+/** ================== MAP (Leaflet) ================== **/
+const mapEl = ref(null);
+let map = null;
+let marker = null;
+const lat = computed(() => {
+    const n = Number(complaint.value?.latitude);
+    return Number.isFinite(n) ? n : null;
+});
+const lng = computed(() => {
+    const n = Number(complaint.value?.longitude);
+    return Number.isFinite(n) ? n : null;
+});
+const hasCoords = computed(() => lat.value !== null && lng.value !== null);
+
+function initMap() {
+    if (!mapEl.value || !hasCoords.value) return;
+
+    if (map) {
+        map.remove();
+        map = null;
+        marker = null;
+    }
+
+    map = L.map(mapEl.value).setView([lat.value, lng.value], 15);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    marker = L.marker([lat.value, lng.value]).addTo(map);
+
+    setTimeout(() => map?.invalidateSize(), 150);
+}
+
+function updateMap() {
+    if (!map || !hasCoords.value) return;
+    map.setView([lat.value, lng.value], 15);
+    marker?.setLatLng([lat.value, lng.value]);
+}
 
 
 function formatStatus(status) {
@@ -538,7 +587,11 @@ function handleEsc(e) {
 }
 
 onMounted(() => {
-    getComplain();
+    getComplain().then(() => {
+        nextTick(() => {
+            if (hasCoords.value) initMap();
+        });
+    });
 
     window.addEventListener("keydown", handleEsc);
 
@@ -554,5 +607,21 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     window.removeEventListener("keydown", handleEsc);
+
+    if (map) {
+        map.remove();
+        map = null;
+        marker = null;
+    }
+});
+
+
+watch([lat, lng], () => {
+    if (!hasCoords.value) return;
+
+    nextTick(() => {
+        if (!map) initMap();
+        else updateMap();
+    });
 });
 </script>
