@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\ProfileController;
 use App\Http\Controllers\Api\Complain\ComplainController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -31,6 +32,10 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
         Route::get('/{id}', [ComplainController::class, 'show'])->whereNumber('id');
         Route::delete('/delete/{id}', [ComplainController::class, 'delete'])->whereNumber('id');
     });
+
+    Route::get('/user', fn(Request $r) => $r->user()); // already available often
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 
     Route::prefix('create')->group(function () {
         // get location

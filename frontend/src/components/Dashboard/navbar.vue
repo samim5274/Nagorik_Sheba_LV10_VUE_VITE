@@ -42,40 +42,38 @@
         <li v-for="item in mainItems" :key="item.key">
           <button
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition
-                   focus:outline-none focus:ring-2 focus:ring-emerald-500/40
+                   focus:outline-none focus:ring-2 focus:ring-slate-500/40
                    hover:bg-slate-100 dark:hover:bg-white/10"
             :class="activeKey === item.key
               ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-white/10 dark:text-white dark:ring-white/10'
               : ''"
             @click="pick(item.key)"
           >
-            <span class="opacity-90"><component :is="item.icon" /></span>
+            <span class="opacity-90 w-5 text-center"><i :class="item.icon"></i></span>
             <span class="text-sm font-medium">{{ item.label }}</span>
           </button>
         </li>
 
         <!-- Pages dropdown -->
-        <li>
+        <!-- <li>
           <button
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition
-                   focus:outline-none focus:ring-2 focus:ring-emerald-500/40
+                   focus:outline-none focus:ring-2 focus:ring-slate-500/40
                    hover:bg-slate-100 dark:hover:bg-white/10"
             :class="pagesOpen
               ? 'bg-slate-100 ring-1 ring-slate-200 dark:bg-white/10 dark:ring-white/10'
               : ''"
             @click="pagesOpen = !pagesOpen"
-            type="button"
-          >
-            <span class="opacity-90"><component :is="IconFolder" /></span>
-            <span class="text-sm font-medium flex-1">Pages</span>
+            type="button">
+            <span class="opacity-90"><i class="fa-regular fa-folder-open"></i></span>
+            <span class="text-sm font-medium flex-1">Other</span>
 
             <svg
               class="h-4 w-4 transition-transform opacity-80"
               :class="pagesOpen ? 'rotate-180' : ''"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="currentColor"
-            >
+              stroke="currentColor">
               <path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -84,8 +82,7 @@
             v-show="pagesOpen"
             class="mt-1 ml-6 mr-2 rounded-xl ring-1
                    bg-slate-50 ring-slate-200
-                   dark:bg-black/20 dark:ring-white/10"
-          >
+                   dark:bg-black/20 dark:ring-white/10">
             <ul class="py-2">
               <li v-for="p in pageItems" :key="p.key">
                 <button
@@ -94,14 +91,13 @@
                   :class="activeKey === p.key
                     ? 'bg-white text-slate-900 font-medium dark:bg-white/10 dark:text-white'
                     : 'text-slate-700 dark:text-slate-200/90'"
-                  @click="pick(p.key)"
-                >
+                  @click="pick(p.key)">
                   {{ p.label }}
                 </button>
               </li>
             </ul>
           </div>
-        </li>
+        </li> -->
       </ul>
     </nav>
   </aside>
@@ -126,9 +122,11 @@ const pagesOpen = ref(false);
 /* key -> route map */
 const routeMap = {
   dashboard: "/dashboard",
+  profile: "/profile",
   create: "/create",
   complainList: "/complain-list",
-  mycomplain: "/my-complain"
+  mycomplain: "/my-complain",
+  logout: "/login",
 };
 
 /* route দেখে active key */
@@ -137,6 +135,8 @@ const routeMatch = [
   { key: "complainList", prefixes: ["/complaints", "/complain-list"] },
   { key: "create", prefixes: ["/create"] },
   { key: "dashboard", prefixes: ["/dashboard"] },
+  { key: "logout", prefixes: ["/logout"] },
+  { key: "profile", prefixes: ["/profile"] },
 ];
 
 const activeKey = computed(() => {
@@ -158,6 +158,19 @@ async function pick(key) {
   // Pages এর ভিতর click করলে dropdown বন্ধ করতে চাইলে:
   // pagesOpen.value = false;
 
+  // logout special case
+  if (key === "logout") {
+    try {
+      await api.post("/logout"); // তোমার backend route অনুযায়ী
+    } catch (e) {
+      // ignore / show toast
+    } finally {
+      localStorage.removeItem("token"); // যদি token রাখো
+      emit("close");
+      return router.push("/login"); // বা "/"
+    }
+  }
+
   emit("close");
 }
 
@@ -171,23 +184,31 @@ const Icon = (paths) =>
     )
   ).value;
 
-const IconHome = Icon(["M3 10.5l9-7 9 7", "M9 21V12h6v9"]);
-const IconForms = Icon(["M7 7h10", "M7 12h10", "M7 17h6"]);
-const IconCards = Icon(["M4 7h16", "M4 17h16", "M4 7v10", "M20 7v10"]);
-const IconCharts = Icon(["M4 19V5", "M4 19h16", "M8 15v-4", "M12 19v-8", "M16 13V7"]);
-const IconButtons = Icon(["M8 12h8", "M12 8v8"]);
-const IconModals = Icon(["M6 7h12", "M6 17h12", "M6 7v10", "M18 7v10"]);
-const IconTables = Icon(["M4 7h16", "M4 12h16", "M4 17h16", "M8 7v10", "M16 7v10"]);
-const IconFolder = Icon(["M3 7h6l2 2h10v10H3V7"]);
+const faIcons = {
+  home: "fa-solid fa-house",
+  forms: "fa-regular fa-clipboard",          // form/clipboard
+  profile: "fa-regular fa-circle-user",      // profile
+  cards: "fa-solid fa-id-card-clip",         // cards
+  charts: "fa-solid fa-chart-column",        // charts
+  buttons: "fa-regular fa-square-plus",      // add/button
+  modals: "fa-regular fa-window-restore",    // modal/window
+  tables: "fa-solid fa-table",               // table
+  setting: "fa-solid fa-gear",               // settings
+  folder: "fa-regular fa-folder-open",       // folder
+  logout: "fa-solid fa-arrow-right-from-bracket",       // folder
+};
 
 const mainItems = [
-  { key: "dashboard", label: "Dashboard", icon: IconHome },
-  { key: "mycomplain", label: "My complains", icon: IconForms },
-  { key: "complainList", label: "Complains", icon: IconCards },
-  // { key: "charts", label: "Charts", icon: IconCharts },
-  { key: "create", label: "Create complain", icon: IconButtons },
-  // { key: "modals", label: "Modals", icon: IconModals },
-  // { key: "tables", label: "Tables", icon: IconTables },
+  { key: "dashboard", label: "Dashboard", icon: faIcons.home },
+  { key: "profile", label: "Profile", icon: faIcons.profile },
+  { key: "mycomplain", label: "My complains", icon: faIcons.forms },
+  { key: "complainList", label: "Complains", icon: faIcons.cards },
+  // { key: "charts", label: "Charts", icon: faIcons.charts },
+  { key: "create", label: "Create complain", icon: faIcons.buttons },
+  // { key: "modals", label: "Modals", icon: faIcons.modals },
+  // { key: "tables", label: "Tables", icon: faIcons.tables },
+  { key: "setting", label: "Setting", icon: faIcons.setting },
+  { key: "logout", label: "Logout", icon: faIcons.logout },
 ];
 
 const pageItems = [

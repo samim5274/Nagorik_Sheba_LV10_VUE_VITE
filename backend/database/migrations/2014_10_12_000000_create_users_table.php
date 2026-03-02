@@ -16,19 +16,35 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->unique()->nullable();
-            $table->timestamp('email_verified_at')->nullable();
+            
+
+            $table->date('dob')->nullable();
+            $table->enum('gender', ['Male', 'Female', 'Other'])->nullable();
+            $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])->nullable();
+
+            $table->text('present_address')->nullable();
+            $table->text('parmanent_address')->nullable();
+
+            $table->string('national_id', 50)->nullable();
+            $table->string('religion', 50)->nullable();
 
             $table->string('password');
 
             $table->enum('role', ['admin', 'user', 'staff'])->default('user');
             $table->boolean('is_active')->default(true);
 
+            $table->string('photo')->nullable();
+
             $table->string('tokens', 255)->nullable();
             $table->string('otp', 10)->nullable();
             $table->timestamp('otp_expires_at')->nullable();
 
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->ipAddress('last_login_ip')->nullable();
+
+            $table->boolean('is_profile_completed')->default(false);
+
             $table->rememberToken();
             $table->timestamps();
         });

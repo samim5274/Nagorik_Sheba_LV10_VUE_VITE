@@ -17,23 +17,46 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+
+        'dob',
+        'gender',
+        'blood_group',
+
+        'present_address',
+        'parmanent_address',
+
+        'national_id',
+        'religion',
+
         'role',
         'is_active',
+
+        'photo',
+
         'tokens',
         'otp',
         'otp_expires_at',
+
+        'email_verified_at',
         'last_login_at',
         'last_login_ip',
+
+        'is_profile_completed',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'otp',
     ];
 
     protected $casts = [
         'password' => 'hashed',
+
+        'dob' => 'date',
         'is_active' => 'boolean',
+        'is_profile_completed' => 'boolean',
+
         'email_verified_at' => 'datetime',
         'otp_expires_at' => 'datetime',
         'last_login_at' => 'datetime',

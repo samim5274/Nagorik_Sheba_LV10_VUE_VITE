@@ -184,9 +184,9 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from 'vue-router';
-import api from '../../services/api';
+import api, { makeImg } from '../../services/api';
 
 const router = useRouter();
 
@@ -232,9 +232,6 @@ defineProps({
 defineEmits(["open-sidebar", "toggle-theme", "search", "profile-action"]);
 
 const q = ref("");
-const avatarUrl = ref(
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80"
-);
 
 /* dropdown states */
 const notifOpen = ref(false);
@@ -261,6 +258,11 @@ function closeAll() {
 async function pickProfile(action) {
   console.log("profile action:", action);
 
+  if (action === "profile") {
+    closeAll();
+    return router.push("/profile");
+  }
+
   if (action !== "logout") {
     closeAll();
     return;
@@ -274,9 +276,25 @@ async function pickProfile(action) {
   }catch (error) {
     console.error("Logout failed:", error);
   } finally {
+    authUser.value = null;   
+    isLoggedIn.value = false;
     closeAll();
   }
 }
+
+const defaultAvatar =
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80";
+
+const avatarUrl = computed(() => {
+  const photo = authUser.value?.photo;
+  return photo ? makeImg(photo) : defaultAvatar;
+});
+
+
+
+
+
+
 
 /* click outside -> close */
 function onDocClick(e) {
