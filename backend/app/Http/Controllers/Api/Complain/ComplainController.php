@@ -200,7 +200,13 @@ class ComplainController extends Controller
             $data['complaint_no'] = $this->generateComplaintNo();
 
             // Auth user (if logged in)
-            $data['user_id'] = auth('sanctum')->id() ?? auth()->id();
+            $user = auth('sanctum')->user();
+            $data['user_id'] = $user?->id;
+
+            // Complainant
+            $data['complainant_name']  = $user?->name;
+            $data['complainant_phone'] = $user?->phone;
+            $data['complainant_email'] = $user?->email;
 
             // Default values
             $data['status'] = 'pending';

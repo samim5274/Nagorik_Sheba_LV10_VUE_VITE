@@ -267,7 +267,7 @@ const photoPreview = ref("");
 
 const photoUrl = computed(() => {
     const p = user.value?.photo;
-    if (!p) return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80";
+    if (!p) return "/images/avater.png";
     return makeImg(p);
 });
 

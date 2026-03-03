@@ -46,9 +46,9 @@ class StoreComplaintRequest extends FormRequest
             'is_anonymous' => ['nullable', 'boolean'],
 
             // Complainant
-            'complainant_name' => ['required', 'string', 'max:120'],
-            'complainant_phone' => ['required', 'string', 'max:20'],
-            'complainant_email' => ['nullable', 'email', 'max:120'],
+            // 'complainant_name' => ['required', 'string', 'max:120'],
+            // 'complainant_phone' => ['required', 'string', 'max:20'],
+            // 'complainant_email' => ['nullable', 'email', 'max:120'],
 
             // Files
             'attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf,doc,docx', 'max:5120'], // 5MB

@@ -283,7 +283,7 @@ async function pickProfile(action) {
 }
 
 const defaultAvatar =
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80";
+  "/images/avater.png";
 
 const avatarUrl = computed(() => {
   const photo = authUser.value?.photo;

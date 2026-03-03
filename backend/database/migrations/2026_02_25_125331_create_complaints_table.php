@@ -54,7 +54,7 @@ return new class extends Migration
 
             // Complainant info
             $table->string('complainant_name', 120);
-            $table->string('complainant_phone', 20);
+            $table->string('complainant_phone', 20)->nullable();
             $table->string('complainant_email')->nullable();
 
             // Legacy/simple attachment support (optional)
