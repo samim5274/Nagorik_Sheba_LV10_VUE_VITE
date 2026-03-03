@@ -72,170 +72,185 @@
                                         class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                         
                                         <!-- Complaint Info -->
-                                        <td class="px-4 py-4 align-top">
-                                            <div class="space-y-1" @click="viewComplaint(complaint)">
-                                                <div class="flex items-center gap-2">
-                                                    <p class="font-semibold text-slate-800 dark:text-slate-100">
-                                                        <span class="hover:underline hover:cursor-pointer">{{ complaint.title }}</span> - 
-                                                        <span
-                                                            class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
-                                                            :class="{
-                                                                'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200': complaint.priority === 'low',
+                                        <td class="px-2 sm:px-4 py-3 sm:py-4 align-top">
+                                            <div class="group rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+                                                <!-- Clickable Content (Details) -->
+                                                <div class="space-y-3 cursor-pointer" @click="viewComplaint(complaint)">
+                                                    <!-- Title + Badges -->
+                                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                                                        <div class="min-w-0">
+                                                            <div class="flex flex-wrap items-center gap-2">
+                                                                <h3 class="min-w-0 flex-1 truncate text-[14px] sm:text-[15px] font-semibold text-slate-900 dark:text-slate-100">
+                                                                    <span class="group-hover:underline">{{ complaint.title }}</span>
+                                                                </h3>
+
+                                                                <span
+                                                                v-if="complaint.is_anonymous"
+                                                                class="shrink-0 inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold text-purple-700 dark:bg-purple-900/25 dark:text-purple-300">
+                                                                    <i class="fa-solid fa-user-secret mr-1 text-[10px]"></i> Anonymous
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                                                                <span class="font-medium text-indigo-600 dark:text-indigo-400">#{{ complaint.complaint_no || 'N/A' }}</span>
+                                                                <span class="text-slate-300 dark:text-slate-600">•</span>
+                                                                <span class="whitespace-nowrap">{{ formatDate(complaint.created_at) }}</span>
+                                                                <span class="text-slate-300 dark:text-slate-600">•</span>
+                                                                <span class="whitespace-nowrap">{{ formatTime(complaint.created_at) }}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Right badges (wrap + full width on mobile) -->
+                                                        <div class="flex flex-wrap items-center gap-2 sm:justify-end sm:text-right">
+                                                            <!-- Priority -->
+                                                            <span
+                                                                class="inline-flex rounded-full px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold"
+                                                                :class="{
+                                                                'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200': complaint.priority === 'low',
                                                                 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300': complaint.priority === 'medium',
                                                                 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300': complaint.priority === 'high',
                                                                 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': complaint.priority === 'urgent'
-                                                            }"
-                                                            >
-                                                            {{ complaint.priority }}
-                                                        </span> - 
-                                                        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold capitalize" :class="statusBadge(complaint.status)">
-                                                            <span class="h-1.5 w-1.5 rounded-full" :class="statusDot(complaint.status)"></span>
-                                                            {{ formatStatus(complaint.status) }}
+                                                                }">
+                                                                {{ complaint.priority }}
+                                                            </span>
+
+                                                            <!-- Status -->
+                                                            <span
+                                                                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold capitalize"
+                                                                :class="statusBadge(complaint.status)">
+                                                                <span class="h-1.5 w-1.5 rounded-full" :class="statusDot(complaint.status)"></span>
+                                                                {{ formatStatus(complaint.status) }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Meta chips -->
+                                                    <div class="flex flex-wrap items-center gap-1.5">
+                                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                            <i class="fa-solid fa-layer-group mr-1 text-[10px] opacity-70"></i>
+                                                            <span class="truncate max-w-[220px] sm:max-w-none">{{ complaint.category?.name || 'No Category' }}</span>
                                                         </span>
-                                                    </p>
 
-                                                    <span
-                                                        v-if="complaint.is_anonymous"
-                                                        class="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                                                        Anonymous
-                                                    </span>
+                                                        <span
+                                                        v-if="complaint.sub_category"
+                                                        class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                                                            <i class="fa-solid fa-tag mr-1 text-[10px] opacity-70"></i>
+                                                            <span class="truncate max-w-[220px] sm:max-w-none">{{ complaint.sub_category?.name }}</span>
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Location + Address -->
+                                                    <div class="grid gap-2 sm:grid-cols-2">
+                                                        <div class="flex items-start gap-2 text-[11px] sm:text-xs text-slate-600 dark:text-slate-400">
+                                                            <i class="fa-solid fa-location-dot mt-0.5 text-slate-400 dark:text-slate-500"></i>
+                                                            <p class="line-clamp-2">
+                                                                {{ complaint.division?.name || '-' }},
+                                                                {{ complaint.district?.name || '-' }}
+                                                                {{ complaint.upazila?.name || '-' }}
+                                                                <span v-if="complaint.police_station?.name">, {{ complaint.police_station?.name }}</span>
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="flex items-start gap-2 text-[11px] sm:text-xs text-slate-600 dark:text-slate-400">
+                                                            <i class="fa-solid fa-map-pin mt-0.5 text-slate-400 dark:text-slate-500"></i>
+                                                            <p class="line-clamp-2">
+                                                                {{ complaint.address_line || 'No address' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
                                                 </div>
 
-                                                <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline hover:cursor-pointer">
-                                                    #{{ complaint.complaint_no || 'N/A' }}
-                                                </p>
+                                                <!-- Divider -->
+                                                <div class="my-3 sm:my-4 h-px bg-slate-100 dark:bg-slate-800"></div>
 
-                                                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                                                    {{ formatDate(complaint.created_at) }} - {{ formatTime(complaint.created_at) }} <br>
-                                                    <!-- {{ complaint.description?.length > 25 ? complaint.description.slice(0, 25) + '...' : complaint.description }} -->
-                                                </p>
-
-                                                <div class="flex flex-wrap gap-1 pt-1">
-                                                    <span
-                                                    class="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] text-slate-600 dark:text-slate-300"
-                                                    >
-                                                    {{ complaint.category?.name || 'No Category' }}
-                                                    </span>
-
-                                                    <span
-                                                    v-if="complaint.sub_category"
-                                                    class="inline-flex rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-[11px] text-blue-700 dark:text-blue-300"
-                                                    >
-                                                    {{ complaint.sub_category?.name }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-4">
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                    <!-- Like -->
-                                                    <button type="button"
-                                                        @click="getLike(complaint)" 
-                                                        :class="[
-                                                            'inline-flex items-center rounded-lg px-2 py-1 transition',
-                                                            complaint.my_reaction === 'like'
-                                                                ? 'bg-blue-50 text-blue-600 dark:bg-slate-800'
-                                                                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/60'
+                                                <!-- Actions (stack on mobile) -->
+                                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                                                    <div class="flex flex-wrap items-center gap-2">
+                                                        <!-- Like -->
+                                                        <button type="button" @click.stop="getLike(complaint)"
+                                                            :class="[
+                                                                'inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[13px] sm:text-sm font-semibold transition',
+                                                                complaint.my_reaction === 'like'
+                                                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                                                                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                                                             ]">
-                                                            
-                                                        <span>
                                                             <i :class="complaint.my_reaction === 'like' ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
-                                                        </span>
+                                                            <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
+                                                                {{ complaint.likes_count ?? 0 }}
+                                                            </span>
+                                                        </button>
 
-                                                        <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                        <span>{{ complaint.likes_count ?? 0 }}</span>
-                                                        </span>
-                                                    </button>
-
-                                                    <!-- Dislike -->
-                                                    <button type="button"
-                                                        @click="getDisLike(complaint)"
-                                                        :class="[
-                                                            'inline-flex items-center rounded-lg px-2 py-1 transition',
-                                                            complaint.my_reaction === 'dislike'
-                                                                ? 'bg-red-50 text-red-600 dark:bg-slate-800'
-                                                                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/60'
-                                                        ]">
-
-                                                        <span>
+                                                        <!-- Dislike -->
+                                                        <button type="button" @click.stop="getDisLike(complaint)"
+                                                            :class="[
+                                                                'inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[13px] sm:text-sm font-semibold transition',
+                                                                complaint.my_reaction === 'dislike'
+                                                                ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+                                                                : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                                                            ]">
                                                             <i :class="complaint.my_reaction === 'dislike' ? 'fa-solid fa-thumbs-down' : 'fa-regular fa-thumbs-down'"></i>
-                                                        </span>
+                                                            <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
+                                                                {{ complaint.dislikes_count ?? 0 }}
+                                                            </span>
+                                                        </button>
 
-                                                        <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                        <span>{{ complaint.dislikes_count ?? 0 }}</span>
-                                                        </span>
-                                                    </button>
+                                                        <!-- Comments -->
+                                                        <button type="button" class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[13px] sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                            <i class="fa-regular fa-comment"></i>
+                                                            <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
+                                                                {{ complaint.comments_count ?? 0 }}
+                                                            </span>
+                                                        </button>
+                                                    </div>
 
-                                                    <!-- Comment Count -->
-                                                    <button
-                                                        type="button"
-                                                        class="inline-flex items-center rounded-lg px-2 py-1 text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/60">
-                                                        <span><i class="fa-regular fa-comment"></i></span>
-                                                        <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                        {{ complaint.comments_count ?? 0 }}
-                                                        </span>
-                                                    </button>
-
-                                                    <!-- optional text -->
-                                                    <div class="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                                                    <!-- Hint aligns under buttons on mobile -->
+                                                    <div class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                                                         {{
                                                         complaint.my_reaction === 'like'
-                                                            ? 'You liked'
+                                                            ? 'You liked this'
                                                             : complaint.my_reaction === 'dislike'
-                                                            ? 'You disliked'
-                                                            : ((complaint.likes ?? 0) + (complaint.dislikes ?? 0) === 0 ? 'No reaction yet' : ' ')
+                                                            ? 'You disliked this'
+                                                            : 'Be the first to react'
                                                         }}
                                                     </div>
                                                 </div>
 
-                                                <!-- Comment -->
-                                                <div>
-                                                    <div class="mt-4">
-                                                        <div class="flex items-start gap-3">
-                                                            <!-- Avatar -->
-                                                            <div class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                                                <div class="grid h-full w-full place-items-center text-xs font-bold text-slate-600 dark:text-slate-200">
-                                                                    U
-                                                                </div>
+                                                <!-- Comment box (full width on mobile) -->
+                                                <div class="mt-4">
+                                                    <div class="flex items-start gap-3">
+                                                        <!-- Avatar -->
+                                                        <div class="h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                                            <div class="grid h-full w-full place-items-center text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-200">
+                                                                U
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Input -->
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900">
+                                                                <i class="fa-regular fa-face-smile text-slate-400 dark:text-slate-500"></i>
+
+                                                                <input
+                                                                type="text"
+                                                                placeholder="Write a comment..."
+                                                                class="w-full min-w-0 bg-transparent text-[13px] sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+                                                                @click.stop/>
+
+                                                                <button
+                                                                type="button"
+                                                                class="inline-flex shrink-0 items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:opacity-95"
+                                                                @click.stop>
+                                                                <i class="fa-solid fa-paper-plane"></i>
+                                                                </button>
                                                             </div>
 
-                                                            <!-- Comment box -->
-                                                            <div class="flex-1">
-                                                                <div
-                                                                    class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm
-                                                                        focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900">
-                                                                    <input type="text" placeholder="Write a comment..." class="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none dark:text-slate-100 dark:placeholder:text-slate-500"/>
-
-                                                                    <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:opacity-95 transition">
-                                                                    <span aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
-                                                                    </button>
-                                                                </div>
-
-                                                                <!-- small helper text (optional) -->
-                                                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                                                    Press Enter to send
-                                                                </div>
+                                                            <div class="mt-1 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
+                                                                <span>Press Enter to send</span>
+                                                                <span class="hidden sm:inline">Shift + Enter for new line</span>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
-                                            </div>
-                                        </td>
-
-                                        <!-- Location -->
-                                        <td class="px-4 py-4 align-top">
-                                            <div class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                                                <p>
-                                                    {{ complaint.division?.name || '-' }},
-                                                    {{ complaint.district?.name || '-' }}
-                                                    {{ complaint.upazila?.name || '-' }}
-                                                    <span v-if="complaint.police_station?.name">
-                                                    , {{ complaint.police_station?.name }}
-                                                    </span>
-                                                </p>
-                                                <p class="truncate max-w-[180px]">
-                                                    {{ complaint.address_line || 'No address' }}
-                                                </p>
                                             </div>
                                         </td>
                                     </tr>
