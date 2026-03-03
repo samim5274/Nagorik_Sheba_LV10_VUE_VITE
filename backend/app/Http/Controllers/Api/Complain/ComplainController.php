@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use App\Http\Requests\StoreComplaintRequest;
 use App\Models\Division;
 use App\Models\District;
@@ -247,18 +248,24 @@ class ComplainController extends Controller
             // Multiple attachments
             $storedAttachments = [];
 
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $generatedName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $files = $request->file('attachments', []);
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    if (!$file instanceof UploadedFile) continue;
 
+                    if (!$file->isValid()) {
+                        throw new \Exception("Upload failed for {$file->getClientOriginalName()}");
+                    }
+
+                    $generatedName = (string) Str::uuid() . '.' . $file->getClientOriginalExtension();
                     $path = $file->storeAs('complaints/multiple', $generatedName, 'public');
 
                     $storedAttachments[] = [
                         'original_name' => $file->getClientOriginalName(),
-                        'file_name' => $generatedName,
-                        'mime_type' => $file->getClientMimeType(),
-                        'size' => $file->getSize(),
-                        'path' => $path,
+                        'file_name'     => $generatedName,
+                        'mime_type'     => $file->getMimeType(), // server-detected
+                        'size'          => $file->getSize(),
+                        'path'          => $path,
                     ];
                 }
             }

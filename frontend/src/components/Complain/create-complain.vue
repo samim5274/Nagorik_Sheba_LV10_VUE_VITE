@@ -449,7 +449,7 @@
                               <div class="rounded-xl border border-dashed border-slate-300 bg-white dark:bg-gray-900 p-3">
                                 <input
                                   type="file"
-                                  multiple
+                                  multiple accept="video/*,image/*,.pdf,.doc,.docx"
                                   @change="onMultipleFilesChange"
                                   class="block w-full text-sm text-slate-600 dark:text-slate-100 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-indigo-700 hover:file:bg-indigo-100"
                                 />
@@ -769,10 +769,6 @@ function resetComplaintForm() {
 //   form.attachment = e.target.files?.[0] || null;
 // }
 
-function onMultipleFilesChange(e) {
-  form.attachments = Array.from(e.target.files || []);
-}
-
 // ==============================
 // Location Loaders (Clean Version)
 // ==============================
@@ -1074,9 +1070,27 @@ async function submitComplaint(){
   try {
     const fd = new FormData();
 
+    const allowedTypes = new Set([
+      // videos
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",     // mov
+      "video/x-matroska",    // mkv (browser may vary)
+      // images
+      "image/jpeg",
+      "image/png",
+      // docs
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ]);
+
+    // Max size per file (match backend: 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // bytes
+
     // Normal fields
     Object.entries(form).forEach(([key, value]) => {
-      if (key === "attachments") return; // handle separately
+      if (key === "attachments") return;
 
       if (typeof value === "boolean") {
         fd.append(key, value ? 1 : 0);
@@ -1085,16 +1099,39 @@ async function submitComplaint(){
       }
     });
 
-    // Multiple attachments
+    // Multiple attachments (video included)
     if (form.attachments && form.attachments.length) {
-      form.attachments.forEach((file) => {
-        fd.append("attachments[]", file);
-      });
+      for (const file of form.attachments) {
+        // type validation (some mkv may come as "" or application/octet-stream)
+        const type = file?.type || "";
+
+        // If browser can't detect type, allow by extension fallback (optional)
+        const name = (file?.name || "").toLowerCase();
+        const extOk = /\.(mp4|webm|mov|mkv|jpg|jpeg|png|pdf|doc|docx)$/.test(name);
+
+        if (!allowedTypes.has(type) && !extOk) {
+          throw new Error(`Unsupported file type: ${file.name}`);
+        }
+
+        // size validation
+        if (file.size > MAX_FILE_SIZE) {
+          throw new Error(`File too large (max 50MB): ${file.name}`);
+        }
+
+        // correct field name for Laravel array
+        fd.append("attachments[]", file, file.name);
+      }
     }
 
     const res = await api.post("/create", fd, {
-      headers: {
-        "Content-Type": "multipart/form-data",
+      timeout: 120000, // 120s for video upload
+      onUploadProgress: (e) => {
+        // optional progress
+        if (e.total) {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          progress.value = percent;
+          console.log("upload:", percent + "%");
+        }
       },
     });
 
@@ -1109,6 +1146,10 @@ async function submitComplaint(){
   }
 }
 
+function onMultipleFilesChange(e) {
+  const files = Array.from(e.target.files || []);
+  form.attachments = files; // real File objects array
+}
 
 
 async function loadAuthUser() {

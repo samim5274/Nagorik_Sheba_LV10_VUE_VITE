@@ -6,21 +6,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreComplaintRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
+        $allowedExt = 'jpg,jpeg,png,pdf,doc,docx,mp4,webm,mov,mkv';
+
         return [
             // Location
             'division_id' => ['required', 'integer', 'exists:divisions,id'],
@@ -40,28 +35,28 @@ class StoreComplaintRequest extends FormRequest
             'description' => ['required', 'string', 'min:10'],
             'priority' => ['required', 'in:low,medium,high,urgent'],
 
-            // Visibility (frontend radio থেকে mode পাঠাতে পারো, নইলে is_public/is_anonymous পাঠাও)
+            // Visibility
             'visibility_mode' => ['nullable', 'in:public,anonymous'],
             'is_public' => ['nullable', 'boolean'],
             'is_anonymous' => ['nullable', 'boolean'],
 
-            // Complainant
-            // 'complainant_name' => ['required', 'string', 'max:120'],
-            // 'complainant_phone' => ['required', 'string', 'max:20'],
-            // 'complainant_email' => ['nullable', 'email', 'max:120'],
-
-            // Files
-            'attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf,doc,docx', 'max:5120'], // 5MB
+            // Files (single + multiple)
+            'attachment' => ['nullable', 'file', "mimes:$allowedExt", 'max:51200'],
             'attachments' => ['nullable', 'array', 'max:10'],
-            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,pdf,doc,docx', 'max:5120'],
+            'attachments.*' => ['file', "mimes:$allowedExt", 'max:51200'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'attachments.*.mimes' => 'Each attachment must be jpg, jpeg, png, pdf, doc or docx.',
-            'attachments.*.max' => 'Each attachment size must be under 5MB.',
+            'attachment.uploaded' => 'Upload failed. Please try again (file too large or server limit).',
+            'attachment.mimes' => 'Allowed: jpg, jpeg, png, pdf, doc, docx, mp4, webm, mov, mkv.',
+            'attachment.max' => 'File must be under 50MB.',
+
+            'attachments.*.uploaded' => 'Upload failed. Please try again (file too large or server limit).',
+            'attachments.*.mimes' => 'Allowed: jpg, jpeg, png, pdf, doc, docx, mp4, webm, mov, mkv.',
+            'attachments.*.max' => 'Each file must be under 50MB.',
         ];
     }
 }
