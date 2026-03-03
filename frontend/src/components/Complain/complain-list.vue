@@ -221,7 +221,7 @@
                                                         <!-- Avatar -->
                                                         <div class="h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                                                             <div class="grid h-full w-full place-items-center text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-200">
-                                                                U
+                                                                <img class="h-8 w-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10" :src="avatarUrl" alt="User" />
                                                             </div>
                                                         </div>
 
@@ -336,7 +336,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref, computed, watch, reactive } from "vue";
 import { useRouter } from "vue-router";
-import api from "../../services/api";
+import api, {makeImg} from "../../services/api";
 
 import Navbar from '../Dashboard/navbar.vue'
 import Header from '../Dashboard/header.vue'
@@ -597,6 +597,35 @@ async function getDisLike(complain){
 
 
 
+// login user data show {makeImg} inport in api
+const authUser = ref(null);
+const isLoggedIn = ref(false);
+
+async function loadAuthUser() {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+        isLoggedIn.value = false;
+        authUser.value = null;
+        return;
+        }
+
+        const res = await api.get("/user");
+        authUser.value = res.data?.data ?? res.data;
+        isLoggedIn.value = true;
+    } catch (err) {
+        isLoggedIn.value = false;
+        authUser.value = null;
+    }
+}
+
+const defaultAvatar = "/images/avater.png";
+
+const avatarUrl = computed(() => {
+    const photo = authUser.value?.photo;
+    return photo ? makeImg(photo) : defaultAvatar;
+});
+
 
 
 
@@ -621,6 +650,7 @@ function handleEsc(e) {
 /* ESC to close drawer */
 onMounted(() => {
     getComplaints();
+    loadAuthUser();
 
     window.addEventListener("keydown", handleEsc);
     const saved = localStorage.getItem("theme");
