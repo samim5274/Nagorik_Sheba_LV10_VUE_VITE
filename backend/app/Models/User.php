@@ -62,4 +62,9 @@ class User extends Authenticatable
         'otp_expires_at' => 'datetime',
         'last_login_at' => 'datetime',
     ];
+
+    public function complaintReactions()
+    {
+        return $this->hasMany(ComplaintReaction::class);
+    }
 }

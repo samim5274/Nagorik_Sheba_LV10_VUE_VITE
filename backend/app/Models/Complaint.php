@@ -175,4 +175,19 @@ class Complaint extends Model
     {
         return $this->hasMany(ComplaintActivityLog::class);
     }
+
+    public function reactions()
+    {
+        return $this->hasMany(ComplaintReaction::class);
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(ComplaintReaction::class)->where('type', 'like');
+    }
+
+    public function dislikes()
+    {
+        return $this->hasMany(ComplaintReaction::class)->where('type', 'dislike');
+    }
 }

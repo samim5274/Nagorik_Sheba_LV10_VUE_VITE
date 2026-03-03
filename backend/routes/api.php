@@ -31,6 +31,8 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
         Route::get('/stats', [ComplainController::class, 'stats']);
         Route::get('/{id}', [ComplainController::class, 'show'])->whereNumber('id');
         Route::delete('/delete/{id}', [ComplainController::class, 'delete'])->whereNumber('id');
+        Route::post('/like/{id}', [ComplainController::class, 'getLike'])->whereNumber('id');
+        Route::post('/dis-like/{id}', [ComplainController::class, 'getDislike'])->whereNumber('id');
     });
 
     Route::get('/user', fn(Request $r) => $r->user()); // already available often

@@ -25,7 +25,7 @@
                         <button @click="$router.push('/create')"
                             type="button"
                             class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 active:bg-slate-100 transition dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
-                                <span class="text-base leading-none">＋</span>
+                                <span class="text-base leading-none"><i class="fa-solid fa-plus"></i></span>
                                 Create New
                         </button>
                     </div>
@@ -68,12 +68,12 @@
                                 <tbody class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
                                     <tr
                                         v-for="complaint in complaints"
-                                        :key="complaint.id" @click="viewComplaint(complaint)"
+                                        :key="complaint.id"
                                         class="text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                                         
                                         <!-- Complaint Info -->
                                         <td class="px-4 py-4 align-top">
-                                            <div class="space-y-1">
+                                            <div class="space-y-1" @click="viewComplaint(complaint)">
                                                 <div class="flex items-center gap-2">
                                                     <p class="font-semibold text-slate-800 dark:text-slate-100">
                                                         <span class="hover:underline hover:cursor-pointer">{{ complaint.title }}</span> - 
@@ -124,6 +124,73 @@
                                                     {{ complaint.sub_category?.name }}
                                                     </span>
                                                 </div>
+                                            </div>
+                                            <div class="mt-4">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <!-- Like -->
+                                                    <button type="button"
+                                                        @click="getLike(complaint)">
+                                                        <span><i class="fa-regular fa-thumbs-up"></i></span>
+                                                        <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                        0
+                                                        </span>
+                                                    </button>
+
+                                                    <!-- Dislike -->
+                                                    <button type="button"
+                                                        @click="getDisLike(complaint)">
+                                                        <span><i class="fa-regular fa-thumbs-down"></i></span>
+                                                        <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                        0
+                                                        </span>
+                                                    </button>
+
+                                                    <!-- Comment Count -->
+                                                    <button type="button">
+                                                        <span><i class="fa-solid fa-comment"></i></span>
+                                                        <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                        0
+                                                        </span>
+                                                    </button>
+
+                                                    <!-- optional text -->
+                                                    <div class="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                                                        {{ "No reaction yet" }}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Comment -->
+                                                <div>
+                                                    <div class="mt-4">
+                                                        <div class="flex items-start gap-3">
+                                                            <!-- Avatar -->
+                                                            <div class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                                                <div class="grid h-full w-full place-items-center text-xs font-bold text-slate-600 dark:text-slate-200">
+                                                                    U
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Comment box -->
+                                                            <div class="flex-1">
+                                                                <div
+                                                                    class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm
+                                                                        focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900">
+                                                                    <input type="text" placeholder="Write a comment..." class="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none dark:text-slate-100 dark:placeholder:text-slate-500"/>
+
+                                                                    <button type="button" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:opacity-95 transition">
+                                                                    <span aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
+                                                                    </button>
+                                                                </div>
+
+                                                                <!-- small helper text (optional) -->
+                                                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                                    Press Enter to send
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
                                             </div>
                                         </td>
 
@@ -224,7 +291,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch, reactive } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
@@ -421,9 +488,49 @@ function statusDot(status) {
 
 
 
+/**
+ * Complain Rection like and dislike with comment
+ */
 
+async function getLike(complain){
+    loading.value = true;
+    successMsg.value = "";
+    errorMsg.value = "";
 
+    try{
+        const res = await api.post(`/complaints/like/${complain.id}`);
+        console.log(res.data);
+        successMsg.value = `Likes: ${res.data.data.likes}, Dislikes: ${res.data.data.dislikes}`;
+    } catch(err){
+        console.log("API error:", err?.response?.data || err?.message);
+        errorMsg.value = err?.response?.data?.error
+            || err?.response?.data?.message
+            || err?.message
+            || "Something went wrong";
+    } finally {
+        loading.value = false;
+    }
+}
 
+async function getDisLike(complain){
+    loading.value = true;
+    successMsg.value = "";
+    errorMsg.value = "";
+
+    try{
+        const res = await api.post(`/complaints/dis-like/${complain.id}`);
+        // console.log(res.data);
+        successMsg.value = `Likes: ${res.data.data.likes}, Dislikes: ${res.data.data.dislikes}`;
+    } catch(err){
+        console.log("API error:", err?.response?.data || err?.message);
+        errorMsg.value = err?.response?.data?.error
+            || err?.response?.data?.message
+            || err?.message
+            || "Something went wrong";
+    } finally {
+        loading.value = false;
+    }
+}
 
 
 

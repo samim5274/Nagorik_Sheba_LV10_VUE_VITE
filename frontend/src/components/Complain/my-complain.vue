@@ -25,7 +25,7 @@
                         <button @click="$router.push('/create')"
                             type="button"
                             class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 active:bg-slate-100 transition dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
-                                <span class="text-base leading-none">＋</span>
+                                <span class="text-base leading-none"><i class="fa-solid fa-plus"></i></span>
                                 Create New
                         </button>
                     </div>
