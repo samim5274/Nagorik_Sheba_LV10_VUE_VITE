@@ -48,6 +48,14 @@
                             </p>
                             <p class="truncate text-sm text-slate-500 dark:text-slate-400">
                                 {{ user?.email || "No email" }}
+                                <span
+                                    v-if="user?.email"
+                                    class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                                    :class="user?.email_verified_at
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                    : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'">
+                                    {{ user?.email_verified_at ? 'Verified' : 'Not Verified' }}
+                                </span>
                             </p>
 
                             <div class="mt-2 flex flex-wrap gap-2">
@@ -79,7 +87,15 @@
                     </div>
 
                     <div class="mt-5 space-y-3 text-sm">
-                    <InfoRow label="Phone" :value="user?.phone || 'N/A'" />
+                    <InfoRow label="Phone" :value="[ user?.phone || 'N/A', user?.phone ? h( 'span',
+                        {
+                            class: [
+                            'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                            user?.phone_verified_at
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+                            ].join(' ')
+                        }, user?.phone_verified_at ? 'Verified' : 'Not Verified' ) : null ]"/>
                     <InfoRow label="Date of Birth" :value="formatOnlyDate(user?.dob)" />
                     <InfoRow label="Gender" :value="user?.gender || 'N/A'" />
                     <InfoRow label="Blood group" :value="user?.blood_group || 'N/A'" />
@@ -196,10 +212,15 @@ import Header from "../Dashboard/header.vue";
 
 /** small inline components */
 const InfoRow = (props) =>
-    h("div", { class: "flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60" }, [
-        h("span", { class: "text-slate-500 dark:text-slate-300" }, props.label),
-        h("span", { class: "font-semibold text-slate-800 dark:text-slate-100" }, props.value),
-    ]);
+    h( "div",
+        { class: "flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-800/60" },
+        [ h("span", { class: "text-slate-500 dark:text-slate-300" }, props.label),
+    // right side (value)
+    h( "span",
+        { class: "flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100" },
+        Array.isArray(props.value) ? props.value : [props.value] ),
+    ]
+    );
 
 const Field = (props, { slots }) =>
     h("div", { class: props.class || "" }, [

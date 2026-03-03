@@ -38,6 +38,7 @@ class User extends Authenticatable
         'otp_expires_at',
 
         'email_verified_at',
+        'phone_verified_at',
         'last_login_at',
         'last_login_ip',
 

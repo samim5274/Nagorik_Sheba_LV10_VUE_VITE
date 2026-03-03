@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "../router";
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,24 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+/*
+|--------------------------------------------------------------------------
+| Global 401 handler // token invalid holei login route a redirect korbe
+|--------------------------------------------------------------------------
+*/
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err?.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
+    return Promise.reject(err);
+  }
+);
 
 /*
 |--------------------------------------------------------------------------
