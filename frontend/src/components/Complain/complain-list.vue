@@ -129,33 +129,61 @@
                                                 <div class="flex flex-wrap items-center gap-2">
                                                     <!-- Like -->
                                                     <button type="button"
-                                                        @click="getLike(complaint)">
-                                                        <span><i class="fa-regular fa-thumbs-up"></i></span>
+                                                        @click="getLike(complaint)" 
+                                                        :class="[
+                                                            'inline-flex items-center rounded-lg px-2 py-1 transition',
+                                                            complaint.my_reaction === 'like'
+                                                                ? 'bg-blue-50 text-blue-600 dark:bg-slate-800'
+                                                                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/60'
+                                                            ]">
+                                                            
+                                                        <span>
+                                                            <i :class="complaint.my_reaction === 'like' ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+                                                        </span>
+
                                                         <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                        0
+                                                        <span>{{ complaint.likes_count ?? 0 }}</span>
                                                         </span>
                                                     </button>
 
                                                     <!-- Dislike -->
                                                     <button type="button"
-                                                        @click="getDisLike(complaint)">
-                                                        <span><i class="fa-regular fa-thumbs-down"></i></span>
+                                                        @click="getDisLike(complaint)"
+                                                        :class="[
+                                                            'inline-flex items-center rounded-lg px-2 py-1 transition',
+                                                            complaint.my_reaction === 'dislike'
+                                                                ? 'bg-red-50 text-red-600 dark:bg-slate-800'
+                                                                : 'text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/60'
+                                                        ]">
+
+                                                        <span>
+                                                            <i :class="complaint.my_reaction === 'dislike' ? 'fa-solid fa-thumbs-down' : 'fa-regular fa-thumbs-down'"></i>
+                                                        </span>
+
                                                         <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                        0
+                                                        <span>{{ complaint.dislikes_count ?? 0 }}</span>
                                                         </span>
                                                     </button>
 
                                                     <!-- Comment Count -->
-                                                    <button type="button">
-                                                        <span><i class="fa-solid fa-comment"></i></span>
+                                                    <button
+                                                        type="button"
+                                                        class="inline-flex items-center rounded-lg px-2 py-1 text-slate-600 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/60">
+                                                        <span><i class="fa-regular fa-comment"></i></span>
                                                         <span class="ml-1 rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                                        0
+                                                        {{ complaint.comments_count ?? 0 }}
                                                         </span>
                                                     </button>
 
                                                     <!-- optional text -->
                                                     <div class="ml-2 text-xs text-slate-500 dark:text-slate-400">
-                                                        {{ "No reaction yet" }}
+                                                        {{
+                                                        complaint.my_reaction === 'like'
+                                                            ? 'You liked'
+                                                            : complaint.my_reaction === 'dislike'
+                                                            ? 'You disliked'
+                                                            : ((complaint.likes ?? 0) + (complaint.dislikes ?? 0) === 0 ? 'No reaction yet' : ' ')
+                                                        }}
                                                     </div>
                                                 </div>
 
@@ -412,6 +440,14 @@ async function getComplaints(page = 1) {
         const res = await api.get(`/complaints?${params.toString()}`);
         const response = res.data?.data;
 
+        complaints.value = (response?.data ?? []).map((c) => ({
+            ...c,
+            likes: c.likes_count ?? 0,
+            dislikes: c.dislikes_count ?? 0,
+            my_reaction: c.my_reaction ?? null,
+            comments_count: c.comments_count ?? 0,
+        }));
+
         complaints.value = response?.data ?? [];
         currentPage.value = response?.current_page ?? 1;
         lastPage.value = response?.last_page ?? 1;
@@ -492,6 +528,16 @@ function statusDot(status) {
  * Complain Rection like and dislike with comment
  */
 
+function applyReactionResult(target, data) {
+    target.likes = data.likes_count ?? data.like_count ?? data.likes ?? 0;
+    target.dislikes = data.dislikes_count ?? data.dislike_count ?? data.dislikes ?? 0;
+    target.my_reaction = data.my_reaction ?? null;
+
+    // যদি আপনি UI তে likes_count দেখান, এটাও আপডেট করুন
+    target.likes_count = target.likes;
+    target.dislikes_count = target.dislikes;
+}
+
 async function getLike(complain){
     loading.value = true;
     successMsg.value = "";
@@ -499,8 +545,9 @@ async function getLike(complain){
 
     try{
         const res = await api.post(`/complaints/like/${complain.id}`);
-        console.log(res.data);
-        successMsg.value = `Likes: ${res.data.data.likes}, Dislikes: ${res.data.data.dislikes}`;
+        // console.log(res.data);
+        // successMsg.value = `Likes: ${res.data.data.likes}, Dislikes: ${res.data.data.dislikes}`;
+        applyReactionResult(complain, res.data.data);
     } catch(err){
         console.log("API error:", err?.response?.data || err?.message);
         errorMsg.value = err?.response?.data?.error
@@ -520,7 +567,8 @@ async function getDisLike(complain){
     try{
         const res = await api.post(`/complaints/dis-like/${complain.id}`);
         // console.log(res.data);
-        successMsg.value = `Likes: ${res.data.data.likes}, Dislikes: ${res.data.data.dislikes}`;
+        // successMsg.value = `Likes: ${res.data.data.likes}, Dislikes: ${res.data.data.dislikes}`;
+        applyReactionResult(complain, res.data.data);
     } catch(err){
         console.log("API error:", err?.response?.data || err?.message);
         errorMsg.value = err?.response?.data?.error

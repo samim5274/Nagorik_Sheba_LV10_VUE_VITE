@@ -24,7 +24,20 @@ class ComplainController extends Controller
 {
     public function index(Request $request){
         try{
-            $query = Complaint::with(['category','subCategory','division','district','upazila','policeStation'])
+            $userId = auth('sanctum')->id();
+            
+            // $query = Complaint::with(['category','subCategory','division','district','upazila','policeStation'])
+            //     ->latest('id');
+
+            $query = Complaint::query()
+                ->with(['category','subCategory','division','district','upazila','policeStation'])
+                ->withCount(['likes', 'dislikes'])
+                ->with([
+                    'reactions' => function ($q) use ($userId) {
+                        if ($userId) $q->where('user_id', $userId)->select('id','complaint_id','user_id','type');
+                        else $q->whereRaw('1=0'); // guest হলে empty
+                    }
+                ])
                 ->latest('id');
 
             // Search: complaint_no বা title
@@ -45,6 +58,12 @@ class ComplainController extends Controller
 
             // paginate (page param auto handle করে)
             $complaints = $query->paginate(15);
+
+            $complaints->getCollection()->transform(function ($c) {
+                $c->my_reaction = $c->reactions->first()->type ?? null;
+                unset($c->reactions); // response clean
+                return $c;
+            });
 
             return response()->json([
                 'success' => true,
