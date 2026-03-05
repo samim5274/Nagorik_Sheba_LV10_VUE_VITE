@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +20,7 @@ use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Complaint;
 use App\Models\ComplaintReaction;
+use App\Models\ComplaintComments;
 
 
 class ComplainController extends Controller
@@ -593,5 +595,84 @@ class ComplainController extends Controller
             'dislikes' => $dislikes,
             'my_reaction' => $my,
         ];
+    }
+
+    public function storeComment(Request $request){
+
+        DB::beginTransaction();
+
+        try{
+            $validator = Validator::make($request->all(), [
+                // frontend: complain_id, db: complaint_id
+                'complain_id' => ['required', 'integer', 'exists:complaints,id'],
+                'comment'     => ['required', 'string', 'min:1', 'max:2000'],
+
+                // reply comment হলে optional
+                'parent_id'   => ['nullable', 'integer', 'exists:complaint_comments,id'],
+                'is_internal' => ['nullable', 'boolean'],
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation error',
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+
+            $user = $request->user();
+
+            $ua = (string) $request->userAgent();
+            $device   = $this->detectDevice($ua);
+            $platform = $this->detectPlatform($ua);
+            $browser  = $this->detectBrowser($ua);
+
+            $comment = ComplaintComments::create([
+                'complaint_id'        => (int) $request->complain_id,
+                'user_id'             => $user->id,
+                'parent_id'           => $request->parent_id,
+
+                'comment'             => $request->comment,
+
+                'is_admin'            => (bool) ($user->role === 'admin'), // তোমার role system অনুযায়ী বদলাতে পারো
+                'is_internal'         => (bool) ($request->boolean('is_internal')),
+
+                'is_edited'           => false,
+                'edited_at'           => null,
+                'edited_by'           => null,
+
+                'is_deleted'          => false,
+                'deleted_at'          => null,
+                'deleted_by'          => null,
+                'delete_reason'       => null,
+
+                'comment_ip'          => $request->ip(),
+                'comment_user_agent' => substr($ua, 0, 255),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment submitted successfully.',
+                'data'    => $comment,
+            ], 201);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            \Log::error('Complaint comment store error', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit complaint comment.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error'
+            ], 500);
+        }
     }
 }

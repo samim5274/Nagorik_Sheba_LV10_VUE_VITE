@@ -217,39 +217,40 @@
 
                                                 <!-- Comment box (full width on mobile) -->
                                                 <div class="mt-4">
-                                                    <div class="flex items-start gap-3">
-                                                        <!-- Avatar -->
-                                                        <div class="h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                                            <div class="grid h-full w-full place-items-center text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-200">
-                                                                <img class="h-8 w-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10" :src="avatarUrl" alt="User" />
+                                                    <form @submit.prevent="submitComment" class="space-y-6">
+                                                        <div class="flex items-start gap-3">
+                                                            <!-- Avatar -->
+                                                            <div class="h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                                                <div class="grid h-full w-full place-items-center text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-200">
+                                                                    <img class="h-8 w-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10" :src="avatarUrl" alt="User" />
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Input -->
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900">
+                                                                    <i class="fa-regular fa-face-smile text-slate-400 dark:text-slate-500"></i>
+
+                                                                    <input
+                                                                    type="text" v-model="commentText[complaint.id]" @focus="form.complain_id = complaint.id"
+                                                                    placeholder="Write a comment..."
+                                                                    class="w-full min-w-0 bg-transparent text-[13px] sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+                                                                    @click.stop/>
+
+                                                                    <button
+                                                                    type="submit" @click.stop
+                                                                    class="inline-flex shrink-0 items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:opacity-95">
+                                                                    <i class="fa-solid fa-paper-plane"></i>
+                                                                    </button>
+                                                                </div>
+
+                                                                <div class="mt-1 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
+                                                                    <span>Press Enter to send</span>
+                                                                    <span class="hidden sm:inline">Shift + Enter for new line</span>
+                                                                </div>
                                                             </div>
                                                         </div>
-
-                                                        <!-- Input -->
-                                                        <div class="flex-1 min-w-0">
-                                                            <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition focus-within:ring-2 focus-within:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900">
-                                                                <i class="fa-regular fa-face-smile text-slate-400 dark:text-slate-500"></i>
-
-                                                                <input
-                                                                type="text"
-                                                                placeholder="Write a comment..."
-                                                                class="w-full min-w-0 bg-transparent text-[13px] sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
-                                                                @click.stop/>
-
-                                                                <button
-                                                                type="button"
-                                                                class="inline-flex shrink-0 items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:opacity-95"
-                                                                @click.stop>
-                                                                <i class="fa-solid fa-paper-plane"></i>
-                                                                </button>
-                                                            </div>
-
-                                                            <div class="mt-1 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
-                                                                <span>Press Enter to send</span>
-                                                                <span class="hidden sm:inline">Shift + Enter for new line</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </td>
@@ -596,6 +597,60 @@ async function getDisLike(complain){
 }
 
 
+/**
+ * Complain comment
+ */
+const commentText = reactive({});
+
+const form = reactive({
+    complain_id: null,
+});
+
+async function submitComment(){
+    resetErrorAndLoading();
+
+    const id = form.complain_id;
+    if (!id) {
+        errorMsg.value = "Select a complaint first.";
+        loading.value = false;
+        return;
+    }
+
+    const text = (commentText[id] || "").trim();
+    if (!text) {
+        errorMsg.value = "Write something first.";
+        loading.value = false;
+        return;
+    }
+
+    try {        
+        const res = await api.post("/complaints/comment", {
+            complain_id: id,
+            comment: text,
+            parent_id: null,
+            is_internal: false
+        });
+        commentText[id] = "";
+        console.log(res.data.message);
+    } catch (err) {
+        if (err?.response?.status === 422) {
+            const errors = err.response.data?.errors;
+            errorMsg.value = errors?.comment?.[0] || "Validation error";
+        } else {
+            errorMsg.value = err?.response?.data?.message || "Failed to submit comment.";
+        }
+    } finally {
+        loading.value = false;
+    }
+};
+
+
+
+
+
+
+
+
 
 // login user data show {makeImg} inport in api
 const authUser = ref(null);
@@ -605,9 +660,9 @@ async function loadAuthUser() {
     try {
         const token = localStorage.getItem("token");
         if (!token) {
-        isLoggedIn.value = false;
-        authUser.value = null;
-        return;
+            isLoggedIn.value = false;
+            authUser.value = null;
+            return;
         }
 
         const res = await api.get("/user");
