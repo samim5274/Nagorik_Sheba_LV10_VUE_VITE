@@ -235,35 +235,31 @@
                                                     <!-- List -->
                                                     <div v-else class="space-y-3">
                                                         <div
-                                                        v-for="c in (commentsByComplaint[complaint.id] || [])"
-                                                        :key="c.id"
-                                                        class="flex gap-3"
-                                                        >
-                                                        <img
-                                                            class="h-9 w-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10"
-                                                            :src="commentUserAvatar(c.user)"
-                                                            alt="avatar"
-                                                        />
+                                                            v-for="c in (commentsByComplaint[complaint.id] || [])"
+                                                            :key="c.id"
+                                                            class="flex gap-3">
+                                                        
+                                                            <img class="h-9 w-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10" :src="commentUserAvatar(c.user)" alt="avatar"/>
 
-                                                        <div class="min-w-0 flex-1">
-                                                            <div class="flex items-center justify-between gap-2">
-                                                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                                                {{ c.user?.name || "Unknown User" }}
-                                                            </p>
-                                                            <span class="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
-                                                                {{ formatDateTime(c.created_at) }}
-                                                            </span>
-                                                            </div>
+                                                            <div class="min-w-0 flex-1">
+                                                                <div class="flex items-center justify-between gap-2">
+                                                                    <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                                                        {{ c.user?.name || "Unknown User" }}
+                                                                    </p>
+                                                                    <span class="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
+                                                                        {{ formatDateTime(c.created_at) }}
+                                                                    </span>
+                                                                </div>
 
-                                                            <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
-                                                            {{ c.comment }}
+                                                                <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+                                                                    {{ c.comment }}
+                                                                </div>
                                                             </div>
-                                                        </div>
                                                         </div>
 
                                                         <!-- Empty -->
                                                         <div v-if="(commentsByComplaint[complaint.id] || []).length === 0" class="text-sm text-slate-500">
-                                                        No comments yet.
+                                                            No comments yet.
                                                         </div>
                                                     </div>
                                                 </div>
