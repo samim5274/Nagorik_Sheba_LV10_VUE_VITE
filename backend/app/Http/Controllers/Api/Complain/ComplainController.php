@@ -34,7 +34,7 @@ class ComplainController extends Controller
 
             $query = Complaint::query()
                 ->with(['category','subCategory','division','district','upazila','policeStation'])
-                ->withCount(['likes', 'dislikes'])
+                ->withCount(['likes', 'dislikes', 'comments'])
                 ->with([
                     'reactions' => function ($q) use ($userId) {
                         if ($userId) $q->where('user_id', $userId)->select('id','complaint_id','user_id','type');
@@ -653,20 +653,21 @@ class ComplainController extends Controller
             DB::commit();
 
             $comment->load('user:id,name,photo');
-            
+            $commentsCount = ComplaintComments::where('complaint_id', $comment->complaint_id)->count();
             return response()->json([
-            'success' => true,
-            'message' => 'Comment added',
-            'data' => [
-                'id' => $comment->id,
-                'complaint_id' => $comment->complaint_id,
-                'comment' => $comment->comment,
-                'created_at' => $comment->created_at,
+                'success' => true,
+                'message' => 'Comment added',
+                'data' => [
+                    'id' => $comment->id,
+                    'complaint_id' => $comment->complaint_id,
+                    'comment' => $comment->comment,
+                    'created_at' => $comment->created_at,
+                    'comments_count' => $commentsCount,
                     'user' => [
-                        'id' => $comment->user->id,
-                        'name' => $comment->user->name,
-                        'photo' => $comment->user->photo,
-                    ]
+                    'id' => $comment->user->id,
+                    'name' => $comment->user->name,
+                    'photo' => $comment->user->photo,
+                    ],
                 ]
             ]);
 

@@ -402,6 +402,7 @@ const complaints = ref([]);
 const loading = ref(false);
 const errorMsg = ref("");
 const successMsg = ref("");
+const defaultAvatar = "/images/avater.png";
 
 // Reusable state reset helper
 function resetErrorAndLoading() {
@@ -687,23 +688,17 @@ async function submitComment(){
         // console.log(res.data.message);
 
         const created = res.data?.data;
-        if (created?.complaint_id) {
-            const cid = created.complaint_id;
+        // complaint id বের করো (safe)
+        const cid = created?.complaint_id ?? form.complain_id; // id = form.complain_id (focused complaint id)
 
-            // comments panel open না থাকলে open করে দিন
-            commentsOpen[cid] = true;
+        commentsOpen[cid] = true;
+        if (!Array.isArray(commentsByComplaint[cid])) commentsByComplaint[cid] = [];
+        if (created) commentsByComplaint[cid].unshift(created);
 
-            // list না থাকলে create
-            if (!commentsByComplaint[cid]) commentsByComplaint[cid] = [];
-
-            // নতুন comment top এ দেখান
-            commentsByComplaint[cid].unshift(created);
-
-            // count update (যদি দেখান)
-            const targetComplaint = complaints.value.find(x => x.id === cid);
-            if (targetComplaint) {
-                targetComplaint.comments_count = (targetComplaint.comments_count ?? 0) + 1;
-            }
+        // Count update always
+        const targetComplaint = complaints.value.find(x => x.id === cid);
+        if (targetComplaint && created?.comments_count != null) {
+            targetComplaint.comments_count = created.comments_count;
         }
 
     } catch (err) {
@@ -739,10 +734,14 @@ function formatDateTime(date) {
 
 async function toggleComments(complaint) {
     const id = complaint.id;
+
+    if (!Array.isArray(commentsByComplaint[id])) commentsByComplaint[id] = [];
+    if (commentsLoading[id] == null) commentsLoading[id] = false;
+    if (commentsError[id] == null) commentsError[id] = "";
+
     commentsOpen[id] = !commentsOpen[id];
 
-    // প্রথমবার open করলে fetch করবে
-    if (commentsOpen[id] && !commentsByComplaint[id]) {
+    if (commentsOpen[id] && commentsByComplaint[id].length === 0) {
         await fetchComments(id);
     }
 }
@@ -753,10 +752,10 @@ async function fetchComments(complaintId) {
 
     try {
         const res = await api.get(`/complaints/get-comment/${complaintId}`);
-        commentsByComplaint[complaintId] = res.data?.data ?? [];
+        const list = res.data?.data;
+        commentsByComplaint[complaintId] = Array.isArray(list) ? list : [];
     } catch (err) {
-        commentsError[complaintId] =
-        err?.response?.data?.message || "Failed to load comments";
+        commentsError[complaintId] = err?.response?.data?.message || "Failed to load comments";
         commentsByComplaint[complaintId] = [];
     } finally {
         commentsLoading[complaintId] = false;
@@ -790,8 +789,6 @@ async function loadAuthUser() {
         authUser.value = null;
     }
 }
-
-const defaultAvatar = "/images/avater.png";
 
 const avatarUrl = computed(() => {
     const photo = authUser.value?.photo;

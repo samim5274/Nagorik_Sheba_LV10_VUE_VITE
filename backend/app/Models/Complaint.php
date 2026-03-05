@@ -151,12 +151,12 @@ class Complaint extends Model
 
     public function comments()
     {
-        return $this->hasMany(ComplaintComment::class);
+        return $this->hasMany(ComplaintComments::class);
     }
 
     public function publicComments()
     {
-        return $this->hasMany(ComplaintComment::class)
+        return $this->hasMany(ComplaintComments::class)
             ->where('is_internal', false)
             ->where('is_deleted', false);
     }
