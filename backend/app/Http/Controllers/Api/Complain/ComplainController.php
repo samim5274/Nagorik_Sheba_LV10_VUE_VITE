@@ -34,7 +34,13 @@ class ComplainController extends Controller
 
             $query = Complaint::query()
                 ->with(['category','subCategory','division','district','upazila','policeStation'])
-                ->withCount(['likes', 'dislikes', 'comments'])
+                ->withCount([
+                    'likes',
+                    'dislikes',
+                    'comments as comments_count' => function ($q) {
+                        $q->where('is_deleted', false);
+                    },
+                ])
                 ->with([
                     'reactions' => function ($q) use ($userId) {
                         if ($userId) $q->where('user_id', $userId)->select('id','complaint_id','user_id','type');
@@ -692,7 +698,7 @@ class ComplainController extends Controller
     public function showComment($id){
         try{
             $data = ComplaintComments::with(['user:id,name,photo'])
-                ->where('complaint_id', $id)
+                ->where('complaint_id', $id)->where('is_deleted', false)
                 ->latest('id')
                 ->get()
                 ->map(function ($c) {
@@ -719,6 +725,74 @@ class ComplainController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetched complaint comment.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error'
+            ], 500);
+        }
+    }
+
+    public function deleteComment($id){
+        try{
+            $user = auth('sanctum')->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+
+            $comment = ComplaintComments::where('id', $id)->first();
+            if (!$comment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Comment not found.',
+                ], 404);
+            }
+
+            // permission: owner or admin
+            $isOwner = (int)$comment->user_id === (int)$user->id;
+            $isAdmin = ($user->role ?? null) === 'admin';
+
+            if (!$isOwner && !$isAdmin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not allowed to delete this comment.',
+                ], 403);
+            }
+
+            DB::transaction(function () use ($comment, $user) {
+                // logical delete (since you have fields)
+                $comment->update([
+                    'is_deleted'    => true,
+                    'deleted_at'    => now(),
+                    'deleted_by'    => $user->id,
+                    'delete_reason' => "User delete there own comment",
+                ]);
+            });
+
+            $count = ComplaintComments::where('complaint_id', $comment->complaint_id)
+                ->where('is_deleted', false)
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment deleted successfully.',
+                'data' => [
+                    'comment_id' => $comment->id,
+                    'complaint_id' => $comment->complaint_id,
+                    'comments_count' => $count,
+                ],
+            ], 200);
+
+        } catch (\Throwable $e) {
+            \Log::error('Comment delete error', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete comment.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Server error'
             ], 500);
         }

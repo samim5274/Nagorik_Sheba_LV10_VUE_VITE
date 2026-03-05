@@ -259,7 +259,7 @@
                                                                         </div>
 
                                                                         <!-- 3 dots + menu -->
-                                                                        <div class="relative shrink-0" @click.stop>
+                                                                        <div v-if="canManageComment(c)" class="relative shrink-0" @click.stop>
                                                                             <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition" 
                                                                             @click="toggleCommentMenu(complaint.id, c.id)">
                                                                                 <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -836,6 +836,12 @@ function toggleCommentMenu(complaintId, commentId) {
     }
 }
 
+function canManageComment(c) {
+    const me = authUser.value;
+    if (!me) return false;
+    return c?.user?.id === me.id || me.role === "admin";
+}
+
 // close menu when clicking anywhere else
 function closeMenu() {
     openMenu.complaintId = null;
@@ -881,15 +887,33 @@ function saveEditComment(complaintId) {
 }
 
 // UI-only delete confirm (backend later)
-function askDeleteComment(complaintId, c) {
+async function askDeleteComment(complaintId, c) {
     closeMenu();
-    // delete comment code here
+    const ok = confirm("Delete this comment?");
+    if (!ok) return;
+    
+    try {
+        const res = await api.delete(`/complaints/delete-comment/${c.id}`);
+
+        // remove from UI list
+        commentsByComplaint[complaintId] =
+        (commentsByComplaint[complaintId] || []).filter(x => x.id !== c.id);
+
+        // sync count from backend
+        const newCount = res.data?.data?.comments_count;
+        const target = complaints.value.find(x => x.id === complaintId);
+        if (target) {
+            target.comments_count = (newCount != null) ? newCount : Math.max(0, (target.comments_count ?? 0) - 1);
+        }
+
+    } catch (err) {
+        errorMsg.value = err?.response?.data?.message || "Failed to delete comment.";
+    }
 }
 
 function onBodyClick() {
     closeMenu();
 }
-
 
 
 
