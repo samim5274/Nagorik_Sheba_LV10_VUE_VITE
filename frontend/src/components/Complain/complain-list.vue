@@ -237,28 +237,87 @@
                                                         <div
                                                             v-for="c in (commentsByComplaint[complaint.id] || [])"
                                                             :key="c.id"
-                                                            class="flex gap-3">
-                                                        
-                                                            <img class="h-9 w-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10" :src="commentUserAvatar(c.user)" alt="avatar"/>
+                                                            class="flex items-start gap-3">
+                                                            <!-- Avatar -->
+                                                            <img
+                                                                class="h-8 w-8 shrink-0 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10"
+                                                                :src="commentUserAvatar(c.user)"
+                                                                alt="avatar"/>
 
+                                                            <!-- Comment Card -->
                                                             <div class="min-w-0 flex-1">
-                                                                <div class="flex items-center justify-between gap-2">
-                                                                    <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                                                        {{ c.user?.name || "Unknown User" }}
-                                                                    </p>
-                                                                    <span class="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
-                                                                        {{ formatDateTime(c.created_at) }}
-                                                                    </span>
-                                                                </div>
+                                                                <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                                                                    <!-- Header -->
+                                                                    <div class="flex items-start justify-between gap-3">
+                                                                        <div class="min-w-0">
+                                                                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                                                                {{ c.user?.name || "Unknown User" }}
+                                                                            </p>
+                                                                            <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                                                                                {{ formatDateTime(c.created_at) }}
+                                                                            </p>
+                                                                        </div>
 
-                                                                <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
-                                                                    {{ c.comment }}
+                                                                        <!-- 3 dots + menu -->
+                                                                        <div class="relative shrink-0" @click.stop>
+                                                                            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition" 
+                                                                            @click="toggleCommentMenu(complaint.id, c.id)">
+                                                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                                                            </button>
+
+                                                                            <div v-if="isCommentMenuOpen(complaint.id, c.id)"
+                                                                            class="absolute right-0 z-30 mt-2 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    class="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                                                                                    @click="startEditComment(complaint.id, c)">
+                                                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                                                    Edit
+                                                                                </button>
+
+                                                                                <button
+                                                                                    type="button"
+                                                                                    class="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                                                                    @click="askDeleteComment(complaint.id, c)">
+                                                                                    <i class="fa-regular fa-trash-can"></i>
+                                                                                    Delete
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Body -->
+                                                                    <div v-if="!isEditingComment(complaint.id, c.id)" class="mt-2">
+                                                                        <div class="rounded-2xl bg-slate-50 px-3 py-2 text-sm leading-relaxed text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+                                                                            {{ c.comment }}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Edit mode -->
+                                                                    <div v-else class="mt-2 space-y-2">
+                                                                        <textarea
+                                                                            v-model="editState.text"
+                                                                            rows="2"
+                                                                            class="w-full resize-none rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"></textarea>
+
+                                                                        <div class="flex items-center justify-end gap-2">
+                                                                            <button type="button" class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" @click="cancelEdit()">
+                                                                                Cancel
+                                                                            </button>
+
+                                                                            <button type="button" class="rounded-xl bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:opacity-95" @click="saveEditComment(complaint.id)">
+                                                                                Save
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         <!-- Empty -->
-                                                        <div v-if="(commentsByComplaint[complaint.id] || []).length === 0" class="text-sm text-slate-500">
+                                                        <div
+                                                            v-if="!(commentsByComplaint[complaint.id]?.length)"
+                                                            class="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
                                                             No comments yet.
                                                         </div>
                                                     </div>
@@ -271,7 +330,7 @@
                                                             <!-- Avatar -->
                                                             <div class="h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                                                                 <div class="grid h-full w-full place-items-center text-[11px] sm:text-xs font-bold text-slate-600 dark:text-slate-200">
-                                                                    <img class="h-8 w-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10" :src="avatarUrl" alt="User" />
+                                                                    <img class="h-8 w-8 rounded-full object-cover dark:ring-white/10" :src="avatarUrl" alt="User" />
                                                                 </div>
                                                             </div>
 
@@ -760,6 +819,77 @@ async function fetchComments(complaintId) {
 
 
 
+// menu open state (one at a time)
+const openMenu = reactive({ complaintId: null, commentId: null });
+
+function isCommentMenuOpen(complaintId, commentId) {
+    return openMenu.complaintId === complaintId && openMenu.commentId === commentId;
+}
+
+function toggleCommentMenu(complaintId, commentId) {
+    if (isCommentMenuOpen(complaintId, commentId)) {
+        openMenu.complaintId = null;
+        openMenu.commentId = null;
+    } else {
+        openMenu.complaintId = complaintId;
+        openMenu.commentId = commentId;
+    }
+}
+
+// close menu when clicking anywhere else
+function closeMenu() {
+    openMenu.complaintId = null;
+    openMenu.commentId = null;
+}
+
+// edit state
+const editState = reactive({
+    complaintId: null,
+    commentId: null,
+    text: "",
+});
+
+function isEditingComment(complaintId, commentId) {
+    return editState.complaintId === complaintId && editState.commentId === commentId;
+}
+
+function startEditComment(complaintId, c) {
+    closeMenu();
+    editState.complaintId = complaintId;
+    editState.commentId = c.id;
+    editState.text = c.comment || "";
+}
+
+function cancelEdit() {
+    editState.complaintId = null;
+    editState.commentId = null;
+    editState.text = "";
+}
+
+// UI-only save (backend later)
+function saveEditComment(complaintId) {
+    const cid = editState.commentId;
+    if (!cid) return;
+
+    const list = commentsByComplaint[complaintId] || [];
+    const idx = list.findIndex(x => x.id === cid);
+    if (idx !== -1) {
+        list[idx].comment = editState.text.trim();
+    }
+
+    cancelEdit();
+}
+
+// UI-only delete confirm (backend later)
+function askDeleteComment(complaintId, c) {
+    closeMenu();
+    // delete comment code here
+}
+
+function onBodyClick() {
+    closeMenu();
+}
+
 
 
 
@@ -817,6 +947,8 @@ onMounted(() => {
     getComplaints();
     loadAuthUser();
 
+    document.addEventListener("click", onBodyClick);
+
     window.addEventListener("keydown", handleEsc);
     const saved = localStorage.getItem("theme");
     if (saved === "dark") applyTheme(true);
@@ -829,6 +961,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     window.removeEventListener("keydown", handleEsc);
+
+    document.removeEventListener("click", onBodyClick);
 });
 </script>
 
