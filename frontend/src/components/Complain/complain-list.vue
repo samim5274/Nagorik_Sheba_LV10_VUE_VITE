@@ -195,10 +195,14 @@
                                                         </button>
 
                                                         <!-- Comments -->
-                                                        <button type="button" class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[13px] sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                        <button type="button" @click.stop="toggleComments(complaint)" 
+                                                        class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[13px] sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                                                             <i class="fa-regular fa-comment"></i>
                                                             <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
                                                                 {{ complaint.comments_count ?? 0 }}
+                                                            </span>
+                                                            <span class="text-[11px] opacity-70">
+                                                                {{ commentsOpen[complaint.id] ? "Hide" : "Show" }}
                                                             </span>
                                                         </button>
                                                     </div>
@@ -212,6 +216,55 @@
                                                             ? 'You disliked this'
                                                             : 'Be the first to react'
                                                         }}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Comments Panel -->
+                                                <div v-if="commentsOpen[complaint.id]" class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+
+                                                    <!-- Loading -->
+                                                    <div v-if="commentsLoading[complaint.id]" class="text-sm text-slate-500">
+                                                        Loading comments...
+                                                    </div>
+
+                                                    <!-- Error -->
+                                                    <div v-else-if="commentsError[complaint.id]" class="text-sm text-red-500">
+                                                        {{ commentsError[complaint.id] }}
+                                                    </div>
+
+                                                    <!-- List -->
+                                                    <div v-else class="space-y-3">
+                                                        <div
+                                                        v-for="c in (commentsByComplaint[complaint.id] || [])"
+                                                        :key="c.id"
+                                                        class="flex gap-3"
+                                                        >
+                                                        <img
+                                                            class="h-9 w-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-white/10"
+                                                            :src="commentUserAvatar(c.user)"
+                                                            alt="avatar"
+                                                        />
+
+                                                        <div class="min-w-0 flex-1">
+                                                            <div class="flex items-center justify-between gap-2">
+                                                            <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                                                {{ c.user?.name || "Unknown User" }}
+                                                            </p>
+                                                            <span class="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
+                                                                {{ formatDateTime(c.created_at) }}
+                                                            </span>
+                                                            </div>
+
+                                                            <div class="mt-1 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+                                                            {{ c.comment }}
+                                                            </div>
+                                                        </div>
+                                                        </div>
+
+                                                        <!-- Empty -->
+                                                        <div v-if="(commentsByComplaint[complaint.id] || []).length === 0" class="text-sm text-slate-500">
+                                                        No comments yet.
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -464,7 +517,7 @@ async function getComplaints(page = 1) {
             comments_count: c.comments_count ?? 0,
         }));
 
-        complaints.value = response?.data ?? [];
+        // complaints.value = response?.data ?? [];
         currentPage.value = response?.current_page ?? 1;
         lastPage.value = response?.last_page ?? 1;
         total.value = response?.total ?? 0;
@@ -631,7 +684,28 @@ async function submitComment(){
             is_internal: false
         });
         commentText[id] = "";
-        console.log(res.data.message);
+        // console.log(res.data.message);
+
+        const created = res.data?.data;
+        if (created?.complaint_id) {
+            const cid = created.complaint_id;
+
+            // comments panel open না থাকলে open করে দিন
+            commentsOpen[cid] = true;
+
+            // list না থাকলে create
+            if (!commentsByComplaint[cid]) commentsByComplaint[cid] = [];
+
+            // নতুন comment top এ দেখান
+            commentsByComplaint[cid].unshift(created);
+
+            // count update (যদি দেখান)
+            const targetComplaint = complaints.value.find(x => x.id === cid);
+            if (targetComplaint) {
+                targetComplaint.comments_count = (targetComplaint.comments_count ?? 0) + 1;
+            }
+        }
+
     } catch (err) {
         if (err?.response?.status === 422) {
             const errors = err.response.data?.errors;
@@ -645,6 +719,49 @@ async function submitComment(){
 };
 
 
+const commentsByComplaint = reactive({});   // { [complaintId]: [] }
+const commentsOpen = reactive({});          // { [complaintId]: true/false }
+const commentsLoading = reactive({});       // { [complaintId]: true/false }
+const commentsError = reactive({});         // { [complaintId]: "..." }
+
+function commentUserAvatar(user) {
+    const photo = user?.photo;
+    return photo ? makeImg(photo) : defaultAvatar;
+}
+
+function formatDateTime(date) {
+    if (!date) return "";
+    return new Date(date).toLocaleString("en-BD", {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+}
+
+async function toggleComments(complaint) {
+    const id = complaint.id;
+    commentsOpen[id] = !commentsOpen[id];
+
+    // প্রথমবার open করলে fetch করবে
+    if (commentsOpen[id] && !commentsByComplaint[id]) {
+        await fetchComments(id);
+    }
+}
+
+async function fetchComments(complaintId) {
+    commentsLoading[complaintId] = true;
+    commentsError[complaintId] = "";
+
+    try {
+        const res = await api.get(`/complaints/get-comment/${complaintId}`);
+        commentsByComplaint[complaintId] = res.data?.data ?? [];
+    } catch (err) {
+        commentsError[complaintId] =
+        err?.response?.data?.message || "Failed to load comments";
+        commentsByComplaint[complaintId] = [];
+    } finally {
+        commentsLoading[complaintId] = false;
+    }
+}
 
 
 

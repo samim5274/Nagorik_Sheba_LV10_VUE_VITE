@@ -20,7 +20,7 @@ Route::post('/register', [AuthController::class, 'register']);
 // ======================
 // Protected Routes
 // ======================
-Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:300, 1'])->group(function () {
     // Common Routes
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum', 'throttle:60, 1'])->group(function () {
         Route::post('/like/{id}', [ComplainController::class, 'getLike'])->whereNumber('id');
         Route::post('/dis-like/{id}', [ComplainController::class, 'getDislike'])->whereNumber('id');
         Route::post('/comment', [ComplainController::class, 'storeComment']);
+        Route::get('/get-comment/{id}', [ComplainController::class, 'showComment'])->whereNumber('id');
     });
 
     Route::get('/user', fn(Request $r) => $r->user()); // already available often

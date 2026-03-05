@@ -652,11 +652,23 @@ class ComplainController extends Controller
 
             DB::commit();
 
+            $comment->load('user:id,name,photo');
+            
             return response()->json([
-                'success' => true,
-                'message' => 'Comment submitted successfully.',
-                'data'    => $comment,
-            ], 201);
+            'success' => true,
+            'message' => 'Comment added',
+            'data' => [
+                'id' => $comment->id,
+                'complaint_id' => $comment->complaint_id,
+                'comment' => $comment->comment,
+                'created_at' => $comment->created_at,
+                    'user' => [
+                        'id' => $comment->user->id,
+                        'name' => $comment->user->name,
+                        'photo' => $comment->user->photo,
+                    ]
+                ]
+            ]);
 
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -671,6 +683,41 @@ class ComplainController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to submit complaint comment.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error'
+            ], 500);
+        }
+    }
+
+    public function showComment($id){
+        try{
+            $data = ComplaintComments::with(['user:id,name,photo'])
+                ->where('complaint_id', $id)
+                ->latest('id')
+                ->get()
+                ->map(function ($c) {
+                    return [
+                        'id' => $c->id,
+                        'complaint_id' => $c->complaint_id,
+                        'comment' => $c->comment,
+                        'created_at' => $c->created_at,
+                        'user' => $c->user ? [
+                            'id' => $c->user->id,
+                            'name' => $c->user->name,
+                            'photo' => $c->user->photo,
+                        ] : null,
+                    ];
+                });
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Fetched complaint comments.',
+                'data' => $data
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetched complaint comment.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Server error'
             ], 500);
         }
