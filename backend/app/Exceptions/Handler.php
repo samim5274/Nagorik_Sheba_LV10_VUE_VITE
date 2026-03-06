@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -26,5 +27,18 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        // API requests -> JSON response for 429
+        if (($request->is('api/*') || $request->expectsJson()) && $e instanceof TooManyRequestsHttpException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many requests. Please slow down.',
+            ], 429);
+        }
+
+        return parent::render($request, $e);
     }
 }

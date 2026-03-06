@@ -80,6 +80,11 @@ class ComplainController extends Controller
                 'data' => $complaints
             ], 200);
         } catch (\Throwable $e) {
+            \Log::error('Complaints index error', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Complaints can not fetched.',
@@ -514,7 +519,14 @@ class ComplainController extends Controller
     public function getLike($id){
         try{
             $user = auth('sanctum')->user();
-            $complaint = Complaint::findOrFail($id);
+            $complaint = Complaint::find($id);
+
+            if (!$complaint) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Complaint not found.'
+                ], 404);
+            }
 
             if (!$user) {
                 return response()->json(['success'=>false,'message'=>'Unauthenticated'], 401);
@@ -558,35 +570,53 @@ class ComplainController extends Controller
 
     public function getDislike($id)
     {
-        $user = auth('sanctum')->user();
-        $complaint = Complaint::findOrFail($id);
+        try{
+            $user = auth('sanctum')->user();
+            if (!$user) {
+                return response()->json(['success'=>false,'message'=>'Unauthenticated'], 401);
+            }
+            $complaint = Complaint::find($id);
 
-        $reaction = ComplaintReaction::where('complaint_id', $complaint->id)
-            ->where('user_id', $user->id)
-            ->first();
+            if (!$complaint) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Complaint not found.'
+                ], 404);
+            }
 
-        // If already disliked => toggle off
-        if ($reaction && $reaction->type === 'dislike') {
-            $reaction->delete();
+            $reaction = ComplaintReaction::where('complaint_id', $complaint->id)
+                ->where('user_id', $user->id)
+                ->first();
+
+            // If already disliked => toggle off
+            if ($reaction && $reaction->type === 'dislike') {
+                $reaction->delete();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Dislike removed',
+                    'data' => $this->reactionCounts($complaint->id, $user->id)
+                ]);
+            }
+
+            // switch/create dislike
+            ComplaintReaction::updateOrCreate(
+                ['complaint_id' => $complaint->id, 'user_id' => $user->id],
+                ['type' => 'dislike']
+            );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Dislike removed',
+                'message' => 'Get dis-liked complain',
                 'data' => $this->reactionCounts($complaint->id, $user->id)
             ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to react complaint.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // switch/create dislike
-        ComplaintReaction::updateOrCreate(
-            ['complaint_id' => $complaint->id, 'user_id' => $user->id],
-            ['type' => 'dislike']
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Get dis-liked complain',
-            'data' => $this->reactionCounts($complaint->id, $user->id)
-        ]);
     }
 
     private function reactionCounts($complaintId, $userId)

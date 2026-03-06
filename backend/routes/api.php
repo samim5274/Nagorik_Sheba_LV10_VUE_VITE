@@ -20,22 +20,30 @@ Route::post('/register', [AuthController::class, 'register']);
 // ======================
 // Protected Routes
 // ======================
-Route::middleware(['auth:sanctum', 'throttle:300, 1'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     // Common Routes
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // public complaint
     Route::prefix('complaints')->group(function () {
-        Route::get('/', [ComplainController::class, 'index']);
-        Route::get('/view', [ComplainController::class, 'myComplain']);
-        Route::get('/stats', [ComplainController::class, 'stats']);
-        Route::get('/{id}', [ComplainController::class, 'show'])->whereNumber('id');
-        Route::delete('/delete/{id}', [ComplainController::class, 'delete'])->whereNumber('id');
-        Route::post('/like/{id}', [ComplainController::class, 'getLike'])->whereNumber('id');
-        Route::post('/dis-like/{id}', [ComplainController::class, 'getDislike'])->whereNumber('id');
-        Route::post('/comment', [ComplainController::class, 'storeComment']);
-        Route::get('/get-comment/{id}', [ComplainController::class, 'showComment'])->whereNumber('id');
-        Route::delete('/delete-comment/{id}', [ComplainController::class, 'deleteComment'])->whereNumber('id');
+
+        // READ: higher rate
+        Route::middleware('throttle:12000,1')->group(function () {
+            Route::get('/', [ComplainController::class, 'index']);
+            Route::get('/view', [ComplainController::class, 'myComplain']);
+            Route::get('/stats', [ComplainController::class, 'stats']);
+            Route::get('/{id}', [ComplainController::class, 'show'])->whereNumber('id');
+            Route::get('/get-comment/{id}', [ComplainController::class, 'showComment'])->whereNumber('id');
+        });
+
+        // WRITE: lower rate
+        Route::middleware('throttle:2000,1')->group(function () {
+            Route::delete('/delete/{id}', [ComplainController::class, 'delete'])->whereNumber('id');
+            Route::post('/like/{id}', [ComplainController::class, 'getLike'])->whereNumber('id');
+            Route::post('/dis-like/{id}', [ComplainController::class, 'getDislike'])->whereNumber('id');
+            Route::post('/comment', [ComplainController::class, 'storeComment']);
+            Route::delete('/delete-comment/{id}', [ComplainController::class, 'deleteComment'])->whereNumber('id');
+        });
     });
 
     Route::get('/user', fn(Request $r) => $r->user()); // already available often
