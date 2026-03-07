@@ -43,7 +43,7 @@
 
                     <div class="mt-6">
                         <h3 class="text-3xl font-bold text-slate-900 dark:text-white">
-                            {{ card.value }}
+                            {{ formatCount(card.value ?? 0) }}
                         </h3>
 
                         <p v-if="card.subtext" class="mt-2 flex items-center text-sm font-medium" :class="card.subtextClass">
@@ -506,6 +506,22 @@ function handleApiError(err, fallbackMessage, targetRef = null) {
     if (targetRef) {
         targetRef.value = [];
     }
+}
+
+function formatCount(value) {
+    const num = Number(value) || 0;
+
+    if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    }
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+
+    return num.toString();
 }
 
 // date/time format
