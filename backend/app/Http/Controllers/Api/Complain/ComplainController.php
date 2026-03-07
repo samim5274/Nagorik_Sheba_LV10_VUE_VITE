@@ -289,31 +289,7 @@ class ComplainController extends Controller
             // }
 
             // Multiple attachments
-            $storedAttachments = [];
-
-            $files = $request->file('attachments', []);
-            if (is_array($files)) {
-                foreach ($files as $file) {
-                    if (!$file instanceof UploadedFile) continue;
-
-                    if (!$file->isValid()) {
-                        throw new \Exception("Upload failed for {$file->getClientOriginalName()}");
-                    }
-
-                    $generatedName = (string) Str::uuid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('complaints/multiple', $generatedName, 'public');
-
-                    $storedAttachments[] = [
-                        'original_name' => $file->getClientOriginalName(),
-                        'file_name'     => $generatedName,
-                        'mime_type'     => $file->getMimeType(), // server-detected
-                        'size'          => $file->getSize(),
-                        'path'          => $path,
-                    ];
-                }
-            }
-
-            $data['attachments'] = $storedAttachments ?: null;
+            $data['attachments'] = $this->storeAttachments($request);
 
             $complaint = Complaint::create($data);
 
@@ -344,6 +320,40 @@ class ComplainController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'Server error'
             ], 500);
         }
+    }
+
+    private function storeAttachments(Request $request): ?array
+    {
+        $storedAttachments = [];
+
+        $files = $request->file('attachments', []);
+
+        if (!is_array($files)) {
+            return null;
+        }
+
+        foreach ($files as $file) {
+            if (!$file instanceof UploadedFile) {
+                continue;
+            }
+
+            if (!$file->isValid()) {
+                throw new \Exception("Upload failed for {$file->getClientOriginalName()}");
+            }
+
+            $generatedName = (string) Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('complaints/multiple', $generatedName, 'public');
+
+            $storedAttachments[] = [
+                'original_name' => $file->getClientOriginalName(),
+                'file_name' => $generatedName,
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'path' => $path,
+            ];
+        }
+
+        return $storedAttachments ?: null;
     }
 
     private function generateComplaintNo(): string
