@@ -176,7 +176,7 @@
                                                             ]">
                                                             <i :class="complaint.my_reaction === 'like' ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
                                                             <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
-                                                                {{ complaint.likes_count ?? 0 }}
+                                                                {{ formatCount(complaint.likes_count ?? 0) }}
                                                             </span>
                                                         </button>
 
@@ -190,7 +190,7 @@
                                                             ]">
                                                             <i :class="complaint.my_reaction === 'dislike' ? 'fa-solid fa-thumbs-down' : 'fa-regular fa-thumbs-down'"></i>
                                                             <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
-                                                                {{ complaint.dislikes_count ?? 0 }}
+                                                                {{ formatCount(complaint.dislikes_count ?? 0) }}
                                                             </span>
                                                         </button>
 
@@ -199,7 +199,7 @@
                                                         class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[13px] sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                                                             <i class="fa-regular fa-comment"></i>
                                                             <span class="rounded-lg bg-white/70 px-2 py-0.5 text-[11px] sm:text-xs font-bold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900/40 dark:text-slate-200 dark:ring-slate-700">
-                                                                {{ complaint.comments_count ?? 0 }}
+                                                                {{ formatCount(complaint.comments_count ?? 0) }}
                                                             </span>
                                                             <span class="text-[11px] opacity-70">
                                                                 {{ commentsOpen[complaint.id] ? "Hide" : "Show" }}
@@ -785,6 +785,22 @@ function formatDateTime(date) {
         year: "numeric", month: "short", day: "numeric",
         hour: "2-digit", minute: "2-digit"
     });
+}
+
+function formatCount(value) {
+    const num = Number(value) || 0;
+
+    if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+    }
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+
+    return num.toString();
 }
 
 async function toggleComments(complaint) {
