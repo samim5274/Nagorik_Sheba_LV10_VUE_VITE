@@ -51,17 +51,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 
     Route::prefix('create')->group(function () {
-        // get location
-        Route::get('/get-division', [ComplainController::class, 'getDivision']);
-        Route::get('/get-district/{id}', [ComplainController::class, 'getDistrict']);
-        Route::get('/get-upazila/{id}', [ComplainController::class, 'getUpazila']);
-        Route::get('/get-policeStations/{id}', [ComplainController::class, 'getPoliceStations']);
 
-        // get category and sub category
-        Route::get('/get-category', [ComplainController::class, 'getCategory']);
-        Route::get('/get-subcategory/{id}', [ComplainController::class, 'getSubcategory']);
+        Route::middleware('throttle:12000,1')->group(function () {
+            // get location
+            Route::get('/get-division', [ComplainController::class, 'getDivision']);
+            Route::get('/get-district/{id}', [ComplainController::class, 'getDistrict']);
+            Route::get('/get-upazila/{id}', [ComplainController::class, 'getUpazila']);
+            Route::get('/get-policeStations/{id}', [ComplainController::class, 'getPoliceStations']);
 
-        // create complaint
-        Route::post('/', [ComplainController::class, 'store']);
+            // get category and sub category
+            Route::get('/get-category', [ComplainController::class, 'getCategory']);
+            Route::get('/get-subcategory/{id}', [ComplainController::class, 'getSubcategory']);
+
+            // create complaint
+            Route::post('/', [ComplainController::class, 'store']);
+        });
     });
 });

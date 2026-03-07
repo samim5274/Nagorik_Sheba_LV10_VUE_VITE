@@ -224,59 +224,59 @@
                         <div class="flex flex-col gap-2 border-slate-200 bg-white dark:bg-slate-900 shadow-sm px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                             <p class="text-xs text-slate-500">
                                 Showing
-                                <span class="font-semibold text-slate-700">{{ fromItem }}</span>
+                                <span class="font-semibold text-slate-700">{{ publicFromItem }}</span>
                                 –
-                                <span class="font-semibold text-slate-700">{{ toItem }}</span>
+                                <span class="font-semibold text-slate-700">{{ publicToItem }}</span>
                                 of
-                                <span class="font-semibold text-slate-700">{{ total }}</span>
+                                <span class="font-semibold text-slate-700">{{ publicTotal }}</span>
                             </p>
 
                             <div class="flex flex-wrap items-center justify-end gap-2">
                                 <!-- First -->
                                 <button
                                     @click="getComplaints(1)"
-                                    :disabled="currentPage === 1 || loading"
+                                    :disabled="publicPage === 1 || publicLoading"
                                     class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                     <i class="fa-solid fa-angles-left"></i>
                                 </button>
 
                                 <!-- Prev -->
                                 <button
-                                    @click="getComplaints(Math.max(1, currentPage - 1))"
-                                    :disabled="currentPage === 1 || loading"
+                                    @click="getComplaints(Math.max(1, publicPage - 1))"
+                                    :disabled="publicPage === 1 || publicLoading"
                                     class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                     <i class="fa-solid fa-chevron-left"></i>
                                 </button>
 
                                 <!-- Pages -->
                                 <button
-                                    v-for="page in visiblePages"
+                                    v-for="page in publicVisiblePages"
                                     :key="String(page)"
-                                    :disabled="page === '...' || loading"
+                                    :disabled="page === '...' || publicLoading"
                                     @click="page !== '...' && getComplaints(page)"
                                     class="rounded-lg border px-3 py-1.5 text-xs font-semibold"
                                     :class="[
                                         page === '...'
-                                        ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
-                                        : currentPage === page
-                                            ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                                            : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
+                                            ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
+                                            : publicPage === page
+                                                ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                                                : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
                                     ]">
                                     {{ page }}
                                 </button>
 
                                 <!-- Next -->
                                 <button
-                                    @click="getComplaints(Math.min(lastPage, currentPage + 1))"
-                                    :disabled="currentPage === lastPage || loading"
+                                    @click="getComplaints(Math.min(publicLastPage, publicPage + 1))"
+                                    :disabled="publicPage === publicLastPage || publicLoading"
                                     class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                     <i class="fa-solid fa-angle-right"></i>
                                 </button>
 
                                 <!-- Last -->
                                 <button
-                                    @click="getComplaints(lastPage)"
-                                    :disabled="currentPage === lastPage || loading"
+                                    @click="getComplaints(publicLastPage)"
+                                    :disabled="publicPage === publicLastPage || publicLoading"
                                     class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                     <i class="fa-solid fa-angles-right"></i>
                                 </button>
@@ -416,59 +416,59 @@
                     <div class="flex flex-col gap-2 border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                         <p class="text-xs text-slate-500">
                             Showing
-                            <span class="font-semibold text-slate-700">{{ fromItem }}</span>
+                            <span class="font-semibold text-slate-700">{{ myFromItem }}</span>
                             –
-                            <span class="font-semibold text-slate-700">{{ toItem }}</span>
+                            <span class="font-semibold text-slate-700">{{ myToItem }}</span>
                             of
-                            <span class="font-semibold text-slate-700">{{ total }}</span>
+                            <span class="font-semibold text-slate-700">{{ myTotal }}</span>
                         </p>
 
                         <div class="flex flex-wrap items-center justify-end gap-2">
                             <!-- First -->
                             <button
                                 @click="getMyComplaints(1)"
-                                :disabled="currentPage === 1 || loading"
+                                :disabled="myPage === 1 || myLoading"
                                 class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                 <i class="fa-solid fa-angles-left"></i>
                             </button>
 
                             <!-- Prev -->
                             <button
-                                @click="getMyComplaints(Math.max(1, currentPage - 1))"
-                                :disabled="currentPage === 1 || loading"
+                                @click="getMyComplaints(Math.max(1, myPage - 1))"
+                                :disabled="myPage === 1 || myLoading"
                                 class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </button>
 
                             <!-- Pages -->
                             <button
-                                v-for="page in visiblePages"
+                                v-for="page in myVisiblePages"
                                 :key="String(page)"
-                                :disabled="page === '...' || loading"
+                                :disabled="page === '...' || myLoading"
                                 @click="page !== '...' && getMyComplaints(page)"
                                 class="rounded-lg border px-3 py-1.5 text-xs font-semibold"
                                 :class="[
                                     page === '...'
-                                    ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
-                                    : currentPage === page
-                                        ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                                        : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
+                                        ? 'border-slate-200 bg-white dark:bg-slate-900 text-slate-400 cursor-default'
+                                        : myPage === page
+                                            ? 'border-slate-900 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                                            : 'border-slate-200 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-100 hover:bg-slate-50'
                                 ]">
                                 {{ page }}
                             </button>
 
                             <!-- Next -->
                             <button
-                                @click="getMyComplaints(Math.min(lastPage, currentPage + 1))"
-                                :disabled="currentPage === lastPage || loading"
+                                @click="getMyComplaints(Math.min(myLastPage, myPage + 1))"
+                                :disabled="myPage === myLastPage || myLoading"
                                 class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                 <i class="fa-solid fa-angle-right"></i>
                             </button>
 
                             <!-- Last -->
                             <button
-                                @click="getMyComplaints(lastPage)"
-                                :disabled="currentPage === lastPage || loading"
+                                @click="getMyComplaints(myLastPage)"
+                                :disabled="myPage === myLastPage || myLoading"
                                 class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
                                 <i class="fa-solid fa-angles-right"></i>
                             </button>
@@ -492,10 +492,41 @@ const myComplaints = ref([]);
 const loading = ref(false);
 const errorMsg = ref("");
 
+const publicLoading = ref(false);
+const myLoading = ref(false);
+
+const publicPagination = ref({
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    perPage: 10,
+    from: 0,
+    to: 0,
+});
+
+const myPagination = ref({
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    perPage: 10,
+    from: 0,
+    to: 0,
+});
+
 // loading + error reset
-function resetErrorAndLoading() {
-    loading.value = true;
+function resetErrorAndLoading(type = "public") {
     errorMsg.value = "";
+
+    publicLoading.value = false;
+    myLoading.value = false;
+
+    if (type === "public") {
+        publicLoading.value = true;
+    }
+
+    if (type === "my") {
+        myLoading.value = true;
+    }
 }
 
 // common error handler
@@ -578,17 +609,52 @@ function statusBadge(status) {
 }
 
 // paginate section 
-const currentPage = ref(1);
-const lastPage = ref(1);
-const total = ref(0);
-const perPage = ref(20);
-const fromItem = ref(0);
-const toItem = ref(0);
+const publicPage = ref(1);
+const publicLastPage = ref(1);
+const publicTotal = ref(0);
+const publicPerPage = ref(15);
+const publicFromItem = ref(0);
+const publicToItem = ref(0);
 
-const visiblePages = computed(() => {
+const myPage = ref(1);
+const myLastPage = ref(1);
+const myTotal = ref(0);
+const myPerPage = ref(15);
+const myFromItem = ref(0);
+const myToItem = ref(0);
+
+const publicVisiblePages = computed(() => {
     const pages = [];
-    const last = lastPage.value;
-    const cur = currentPage.value;
+    const last = publicLastPage.value;
+    const cur = publicPage.value;
+
+    if (last <= 5) {
+        for (let i = 1; i <= last; i++) pages.push(i);
+        return pages;
+    }
+
+    pages.push(1);
+
+    if (cur > 3) pages.push("...");
+
+    const start = Math.max(2, cur - 1);
+    const end = Math.min(last - 1, cur + 1);
+
+    for (let i = start; i <= end; i++) {
+        pages.push(i);
+    }
+
+    if (cur < last - 2) pages.push("...");
+
+    pages.push(last);
+
+    return pages;
+});
+
+const myVisiblePages = computed(() => {
+    const pages = [];
+    const last = myLastPage.value;
+    const cur = myPage.value;
 
     if (last <= 5) {
         for (let i = 1; i <= last; i++) pages.push(i);
@@ -615,41 +681,37 @@ const visiblePages = computed(() => {
 
 // get all public complaints
 async function getComplaints(page = 1) {
-    resetErrorAndLoading();
+    resetErrorAndLoading("public");
 
     try {
         const res = await api.get(`/complaints?page=${page}`);
         const response = res.data?.data;
 
         complaints.value = response?.data ?? [];
-        currentPage.value = response?.current_page ?? 1;
-        lastPage.value = response?.last_page ?? 1;
-        total.value = response?.total ?? 0;
-        perPage.value = response?.per_page ?? 20;
-        fromItem.value = response?.from ?? 0;
-        toItem.value = response?.to ?? 0;
-
-        // console.log("API Response:", res.data);
+        publicPage.value = response?.current_page ?? 1;
+        publicLastPage.value = response?.last_page ?? 1;
+        publicTotal.value = response?.total ?? 0;
+        publicPerPage.value = response?.per_page ?? 15;
+        publicFromItem.value = response?.from ?? 0;
+        publicToItem.value = response?.to ?? 0;
     } catch (err) {
-        console.error("complaints load error:", err);
         handleApiError(err, "Failed to load complaints", complaints);
 
         complaints.value = [];
-        currentPage.value = 1;
-        lastPage.value = 1;
-        total.value = 0;
-        fromItem.value = 0;
-        toItem.value = 0;
+        publicPage.value = 1;
+        publicLastPage.value = 1;
+        publicTotal.value = 0;
+        publicFromItem.value = 0;
+        publicToItem.value = 0;
     } finally {
-        loading.value = false;
+        publicLoading.value = false;
     }
 }
 
 async function getMyComplaints(page = 1) {
-    resetErrorAndLoading();
+    resetErrorAndLoading("my");
 
     try {
-
         const params = new URLSearchParams();
         params.set("page", String(page));
 
@@ -657,27 +719,23 @@ async function getMyComplaints(page = 1) {
         const response = res.data?.data;
 
         myComplaints.value = response?.data ?? [];
-        currentPage.value = response?.current_page ?? 1;
-        lastPage.value = response?.last_page ?? 1;
-        total.value = response?.total ?? 0;
-        perPage.value = response?.per_page ?? 20;
-        fromItem.value = response?.from ?? 0;
-        toItem.value = response?.to ?? 0;
-
-        // console.log("API Response:", res.data);
+        myPage.value = response?.current_page ?? 1;
+        myLastPage.value = response?.last_page ?? 1;
+        myTotal.value = response?.total ?? 0;
+        myPerPage.value = response?.per_page ?? 15;
+        myFromItem.value = response?.from ?? 0;
+        myToItem.value = response?.to ?? 0;
     } catch (err) {
-        console.error("complaints load error:", err);
-        handleApiError(err, "Failed to load complaints");
-        myComplaints.value = [];
+        handleApiError(err, "Failed to load complaints", myComplaints);
 
-        complaints.value = [];
-        currentPage.value = 1;
-        lastPage.value = 1;
-        total.value = 0;
-        fromItem.value = 0;
-        toItem.value = 0;
+        myComplaints.value = [];
+        myPage.value = 1;
+        myLastPage.value = 1;
+        myTotal.value = 0;
+        myFromItem.value = 0;
+        myToItem.value = 0;
     } finally {
-        loading.value = false;
+        myLoading.value = false;
     }
 }
 

@@ -743,8 +743,8 @@ function resetComplaintForm() {
   form.ward_no = "";
   form.address_line = "";
   form.landmark = "";
-  form.latitude = "";
-  form.longitude = "";
+  // form.latitude = "";
+  // form.longitude = "";
 
   // form.complainant_name = "";
   // form.complainant_phone = "";

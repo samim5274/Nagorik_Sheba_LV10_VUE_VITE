@@ -163,7 +163,7 @@ class Complaint extends Model
 
     public function attachmentsList()
     {
-        return $this->hasMany(ComplaintAttachment::class);
+        return $this->hasMany(ComplaintAttachments::class);
     }
 
     public function editLogs()
