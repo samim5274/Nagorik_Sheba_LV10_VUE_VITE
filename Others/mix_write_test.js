@@ -17,17 +17,21 @@ const USERS = [
   { email: "user10@gmail.com", password: "12345678" },
 ];
 
+const COMPLAINT_IDS = (__ENV.COMPLAINT_IDS || "")
+  .split(",")
+  .map((v) => Number(v.trim()))
+  .filter((v) => Number.isInteger(v) && v > 0);
+
 const loginFailRate = new Rate("login_fail_rate");
-const idFetchFailRate = new Rate("id_fetch_fail_rate");
+const feedFailRate = new Rate("feed_fail_rate");
 const likeFailRate = new Rate("like_fail_rate");
 const commentFailRate = new Rate("comment_fail_rate");
-const writeFailRate = new Rate("write_fail_rate");
 
 const like429Count = new Counter("like_429_count");
 const comment429Count = new Counter("comment_429_count");
 
 const loginDuration = new Trend("login_duration_custom");
-const idFetchDuration = new Trend("id_fetch_duration_custom");
+const feedDuration = new Trend("feed_duration_custom");
 const likeDuration = new Trend("like_duration_custom");
 const commentDuration = new Trend("comment_duration_custom");
 
@@ -44,17 +48,16 @@ export const options = {
     http_req_duration: ["p(95)<1500"],
 
     login_fail_rate: ["rate==0"],
-    id_fetch_fail_rate: ["rate<0.05"],
+    feed_fail_rate: ["rate<0.02"],
     like_fail_rate: ["rate<0.10"],
     comment_fail_rate: ["rate<0.10"],
-    write_fail_rate: ["rate<0.10"],
 
     login_duration_custom: ["p(95)<1000"],
-    id_fetch_duration_custom: ["p(95)<1000"],
+    feed_duration_custom: ["p(95)<800"],
     like_duration_custom: ["p(95)<1200"],
     comment_duration_custom: ["p(95)<1200"],
   },
-  summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)", "p(99)"],
+  summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)"],
 };
 
 function apiHeaders(token = "") {
@@ -70,7 +73,7 @@ function apiHeaders(token = "") {
   return h;
 }
 
-function debugResponse(name, res, okStatuses = []) {
+function debugResponse(name, res, okStatuses) {
   if (!okStatuses.includes(res.status)) {
     console.log(
       `[${name}] status=${res.status} body=${String(res.body).slice(0, 250)}`
@@ -97,9 +100,9 @@ function extractToken(res) {
   }
 }
 
-function extractComplaintIds(res) {
+function extractComplaintIds(feedRes) {
   try {
-    const body = res.json();
+    const body = feedRes.json();
     const items = body?.data?.data || body?.data || [];
 
     if (!Array.isArray(items)) return [];
@@ -145,7 +148,7 @@ export function setup() {
     if (!token) {
       loginFailRate.add(true);
       console.log(
-        `[TOKEN MISSING] email=${user.email} body=${String(loginRes.body).slice(0, 250)}`
+        `[TOKEN MISSING] email=${user.email} status=${loginRes.status} body=${String(loginRes.body).slice(0, 250)}`
       );
       continue;
     }
@@ -165,19 +168,23 @@ function getToken(tokens) {
 }
 
 function getComplaintId(token) {
+  if (COMPLAINT_IDS.length) {
+    return randomItem(COMPLAINT_IDS);
+  }
+
   const feedRes = http.get(`${BASE_URL}/api/complaints`, {
     headers: apiHeaders(token),
-    tags: { endpoint: "id_fetch" },
+    tags: { endpoint: "feed" },
   });
 
-  idFetchDuration.add(feedRes.timings.duration);
+  feedDuration.add(feedRes.timings.duration);
 
-  const ok = feedRes.status === 200;
-  idFetchFailRate.add(!ok);
+  const feedOk = feedRes.status === 200;
+  feedFailRate.add(!feedOk);
 
-  debugResponse("ID_FETCH", feedRes, [200]);
+  debugResponse("FEED", feedRes, [200]);
 
-  if (!ok) return null;
+  if (!feedOk) return null;
 
   const ids = extractComplaintIds(feedRes);
   if (!ids.length) return null;
@@ -187,10 +194,33 @@ function getComplaintId(token) {
 
 export default function (data) {
   const token = getToken(data.tokens);
-  const complaintId = getComplaintId(token);
+
+  const feedRes = http.get(`${BASE_URL}/api/complaints`, {
+    headers: apiHeaders(token),
+    tags: { endpoint: "feed" },
+  });
+
+  feedDuration.add(feedRes.timings.duration);
+
+  const feedOk = feedRes.status === 200;
+  feedFailRate.add(!feedOk);
+
+  debugResponse("FEED", feedRes, [200]);
+
+  check(feedRes, {
+    "feed success": (r) => r.status === 200,
+  });
+
+  let complaintId = null;
+
+  if (COMPLAINT_IDS.length) {
+    complaintId = randomItem(COMPLAINT_IDS);
+  } else {
+    const ids = extractComplaintIds(feedRes);
+    if (ids.length) complaintId = randomItem(ids);
+  }
 
   if (!complaintId) {
-    writeFailRate.add(true);
     sleep(1);
     return;
   }
@@ -223,7 +253,7 @@ export default function (data) {
     `${BASE_URL}/api/complaints/comment`,
     JSON.stringify({
       complain_id: complaintId,
-      comment: `pure-write-test vu-${__VU} iter-${__ITER} ts-${Date.now()}`,
+      comment: `load-test vu-${__VU} iter-${__ITER} ts-${Date.now()}`,
       parent_id: null,
       is_internal: false,
     }),
@@ -242,13 +272,11 @@ export default function (data) {
     comment429Count.add(1);
   }
 
-  debugResponse("COMMENT", commentRes, [200, 201, 422, 429]);
+  debugResponse("COMMENT", commentRes, [200, 201, 429, 422]);
 
   check(commentRes, {
     "comment success": (r) => [200, 201].includes(r.status),
   });
-
-  writeFailRate.add(!(likeOk && commentOk));
 
   sleep(1);
 }

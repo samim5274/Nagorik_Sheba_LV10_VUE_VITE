@@ -25,39 +25,34 @@ use App\Models\ComplaintComments;
 
 class ComplainController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request): JsonResponse{
         try{
             $userId = auth('sanctum')->id();
             
-            // $query = Complaint::with(['category','subCategory','division','district','upazila','policeStation'])
-            //     ->latest('id');
-
             $query = Complaint::query()
                 ->select([
-                    'id',
-                    'complaint_no',
-                    'title',
-                    'category_id',
-                    'sub_category_id',
-                    'division_id',
-                    'district_id',
-                    'upazila_id',
-                    'police_station_id',
-                    'status',
-                    'priority',
-                    'address_line',
-                    'created_at',
-                    'user_id',
-                    'is_public',
-                    'is_anonymous',
+                    'complaints.id',
+                    'complaints.complaint_no',
+                    'complaints.title',
+                    'complaints.category_id',
+                    'complaints.sub_category_id',
+                    'complaints.division_id',
+                    'complaints.district_id',
+                    'complaints.upazila_id',
+                    'complaints.police_station_id',
+                    'complaints.status',
+                    'complaints.priority',
+                    'complaints.address_line',
+                    'complaints.created_at',
+                    'complaints.is_anonymous',
                 ])
                 ->with([
                     'category:id,name',
-                    'subCategory:id,category_id,name',
+                    'subCategory:id,name',
                     'division:id,name',
-                    'district:id,division_id,name',
-                    'upazila:id,district_id,name',
-                    'policeStation:id,upazila_id,name',
+                    'district:id,name',
+                    'upazila:id,name',
+                    'policeStation:id,name',
                 ])
                 ->withCount([
                     'likes',
@@ -68,16 +63,15 @@ class ComplainController extends Controller
                 ]);
 
                 if ($userId) {
-                    $query->selectSub(
-                        ComplaintReaction::query()
-                            ->select('type')
-                            ->whereColumn('complaint_id', 'complaints.id')
-                            ->where('user_id', $userId)
-                            ->limit(1),
-                        'my_reaction'
-                    );
+                    $myReactionSub = ComplaintReaction::query()
+                        ->select('complaint_id', 'type')
+                        ->where('user_id', $userId);
+
+                    $query->leftJoinSub($myReactionSub, 'my_reaction_row', function ($join) {
+                        $join->on('my_reaction_row.complaint_id', '=', 'complaints.id');
+                    })->addSelect(DB::raw('my_reaction_row.type as my_reaction'));
                 } else {
-                    $query->selectRaw('NULL as my_reaction');
+                    $query->addSelect(DB::raw('NULL as my_reaction'));
                 }
                 
 
@@ -86,8 +80,8 @@ class ComplainController extends Controller
                 $term = trim($request->complaint_no);
 
                 $query->where(function ($q) use ($term) {
-                    $q->where('complaint_no', 'like', '%' . $term . '%')
-                        ->orWhere('title', 'like', '%' . $term . '%');
+                    $q->where('complaints.complaint_no', 'like', "%{$term}%")
+                        ->orWhere('complaints.title', 'like', "%{$term}%");
                 });
             }
 

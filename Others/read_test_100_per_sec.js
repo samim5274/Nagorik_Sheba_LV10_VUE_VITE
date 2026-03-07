@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { check, sleep } from "k6";
+import { check } from "k6";
 import { Rate, Trend } from "k6/metrics";
 
 const BASE_URL = __ENV.BASE_URL || "http://127.0.0.1:8080";
@@ -18,23 +18,30 @@ const USERS = [
 ];
 
 const readFailRate = new Rate("read_fail_rate");
+const loginFailRate = new Rate("login_fail_rate");
+
+const loginDuration = new Trend("login_duration_custom");
 const feedDuration = new Trend("feed_duration_custom");
 const detailsDuration = new Trend("details_duration_custom");
-const loginDuration = new Trend("login_duration_custom");
 
 export const options = {
-  stages: [
-    { duration: "20s", target: 5 },
-    { duration: "40s", target: 20 },
-    { duration: "40s", target: 50 },
-    { duration: "40s", target: 100 },
-    { duration: "20s", target: 0 },
-  ],
+  scenarios: {
+    read_100_per_sec: {
+      executor: "constant-arrival-rate",
+      rate: 100,              // প্রতি second এ 100 iteration
+      timeUnit: "1s",
+      duration: "1m",         // 1 minute test
+      preAllocatedVUs: 120,   // শুরুতে allocate
+      maxVUs: 300,            // দরকার হলে বাড়বে
+    },
+  },
   thresholds: {
     http_req_failed: ["rate<0.05"],
     http_req_duration: ["p(95)<1000"],
 
+    login_fail_rate: ["rate==0"],
     read_fail_rate: ["rate<0.05"],
+
     login_duration_custom: ["p(95)<1000"],
     feed_duration_custom: ["p(95)<800"],
     details_duration_custom: ["p(95)<800"],
@@ -85,7 +92,8 @@ function extractComplaintId(feedRes) {
 
     if (!Array.isArray(items) || !items.length) return 1;
 
-    return Number(items[0]?.id) || 1;
+    const id = Number(items[0]?.id);
+    return Number.isInteger(id) && id > 0 ? id : 1;
   } catch (_) {
     return 1;
   }
@@ -109,7 +117,10 @@ export function setup() {
 
     loginDuration.add(loginRes.timings.duration);
 
-    if (loginRes.status !== 200) {
+    const ok = loginRes.status === 200;
+    loginFailRate.add(!ok);
+
+    if (!ok) {
       console.log(
         `[LOGIN FAILED] email=${user.email} status=${loginRes.status} body=${String(loginRes.body).slice(0, 250)}`
       );
@@ -119,6 +130,7 @@ export function setup() {
     const token = extractToken(loginRes);
 
     if (!token) {
+      loginFailRate.add(true);
       console.log(
         `[TOKEN MISSING] email=${user.email} body=${String(loginRes.body).slice(0, 250)}`
       );
@@ -136,12 +148,13 @@ export function setup() {
 }
 
 function getToken(tokens) {
-  return tokens[(__VU - 1) % tokens.length];
+  return tokens[(__ITER + __VU - 1) % tokens.length];
 }
 
 export default function (data) {
   const token = getToken(data.tokens);
 
+  // 1) Feed
   const feedRes = http.get(`${BASE_URL}/api/complaints`, {
     headers: apiHeaders(token),
     tags: { endpoint: "feed" },
@@ -158,6 +171,7 @@ export default function (data) {
 
   const complaintId = extractComplaintId(feedRes);
 
+  // 2) Details
   const detailsRes = http.get(`${BASE_URL}/api/complaints/${complaintId}`, {
     headers: apiHeaders(token),
     tags: { endpoint: "details" },
@@ -173,8 +187,7 @@ export default function (data) {
   });
 
   readFailRate.add(!(feedOk && detailsOk));
-
-  sleep(1);
 }
 
-// BASE_URL="http://127.0.0.1:8080" k6 run read_test.js
+
+// BASE_URL="http://127.0.0.1:8080" k6 run read_test_100_per_sec.js

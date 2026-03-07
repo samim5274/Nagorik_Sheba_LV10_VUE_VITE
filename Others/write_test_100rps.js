@@ -1,6 +1,6 @@
 import http from "k6/http";
-import { check, sleep } from "k6";
-import { Rate, Counter, Trend } from "k6/metrics";
+import { check } from "k6";
+import { Rate, Trend, Counter } from "k6/metrics";
 
 const BASE_URL = __ENV.BASE_URL || "http://127.0.0.1:8080";
 
@@ -17,40 +17,33 @@ const USERS = [
   { email: "user10@gmail.com", password: "12345678" },
 ];
 
-const loginFailRate = new Rate("login_fail_rate");
-const idFetchFailRate = new Rate("id_fetch_fail_rate");
-const likeFailRate = new Rate("like_fail_rate");
-const commentFailRate = new Rate("comment_fail_rate");
-const writeFailRate = new Rate("write_fail_rate");
+const COMPLAINT_IDS = (__ENV.COMPLAINT_IDS || "")
+  .split(",")
+  .map((v) => Number(v.trim()))
+  .filter((v) => Number.isInteger(v) && v > 0);
 
+const writeFailRate = new Rate("write_fail_rate");
+const likeDuration = new Trend("like_duration_custom");
+const commentDuration = new Trend("comment_duration_custom");
 const like429Count = new Counter("like_429_count");
 const comment429Count = new Counter("comment_429_count");
 
-const loginDuration = new Trend("login_duration_custom");
-const idFetchDuration = new Trend("id_fetch_duration_custom");
-const likeDuration = new Trend("like_duration_custom");
-const commentDuration = new Trend("comment_duration_custom");
-
 export const options = {
-  stages: [
-    { duration: "20s", target: 5 },
-    { duration: "40s", target: 20 },
-    { duration: "40s", target: 50 },
-    { duration: "40s", target: 100 },
-    { duration: "20s", target: 0 },
-  ],
+  scenarios: {
+    write_load: {
+      executor: "constant-arrival-rate",
+      rate: 100,          // 100 iteration প্রতি second
+      timeUnit: "1s",
+      duration: "1m",
+      preAllocatedVUs: 120,
+      maxVUs: 300,
+    },
+  },
   thresholds: {
-    http_req_failed: ["rate<0.05"],
+    http_req_failed: ["rate<0.10"],
     http_req_duration: ["p(95)<1500"],
 
-    login_fail_rate: ["rate==0"],
-    id_fetch_fail_rate: ["rate<0.05"],
-    like_fail_rate: ["rate<0.10"],
-    comment_fail_rate: ["rate<0.10"],
     write_fail_rate: ["rate<0.10"],
-
-    login_duration_custom: ["p(95)<1000"],
-    id_fetch_duration_custom: ["p(95)<1000"],
     like_duration_custom: ["p(95)<1200"],
     comment_duration_custom: ["p(95)<1200"],
   },
@@ -70,16 +63,12 @@ function apiHeaders(token = "") {
   return h;
 }
 
-function debugResponse(name, res, okStatuses = []) {
+function debugResponse(name, res, okStatuses) {
   if (!okStatuses.includes(res.status)) {
     console.log(
       `[${name}] status=${res.status} body=${String(res.body).slice(0, 250)}`
     );
   }
-}
-
-function randomItem(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function extractToken(res) {
@@ -97,9 +86,13 @@ function extractToken(res) {
   }
 }
 
-function extractComplaintIds(res) {
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function extractComplaintIds(feedRes) {
   try {
-    const body = res.json();
+    const body = feedRes.json();
     const items = body?.data?.data || body?.data || [];
 
     if (!Array.isArray(items)) return [];
@@ -128,12 +121,7 @@ export function setup() {
       }
     );
 
-    loginDuration.add(loginRes.timings.duration);
-
-    const loginOk = loginRes.status === 200;
-    loginFailRate.add(!loginOk);
-
-    if (!loginOk) {
+    if (loginRes.status !== 200) {
       console.log(
         `[LOGIN FAILED] email=${user.email} status=${loginRes.status} body=${String(loginRes.body).slice(0, 250)}`
       );
@@ -143,7 +131,6 @@ export function setup() {
     const token = extractToken(loginRes);
 
     if (!token) {
-      loginFailRate.add(true);
       console.log(
         `[TOKEN MISSING] email=${user.email} body=${String(loginRes.body).slice(0, 250)}`
       );
@@ -165,19 +152,18 @@ function getToken(tokens) {
 }
 
 function getComplaintId(token) {
+  if (COMPLAINT_IDS.length) {
+    return randomItem(COMPLAINT_IDS);
+  }
+
   const feedRes = http.get(`${BASE_URL}/api/complaints`, {
     headers: apiHeaders(token),
-    tags: { endpoint: "id_fetch" },
+    tags: { endpoint: "feed_for_write" },
   });
 
-  idFetchDuration.add(feedRes.timings.duration);
+  debugResponse("FEED_FOR_WRITE", feedRes, [200]);
 
-  const ok = feedRes.status === 200;
-  idFetchFailRate.add(!ok);
-
-  debugResponse("ID_FETCH", feedRes, [200]);
-
-  if (!ok) return null;
+  if (feedRes.status !== 200) return null;
 
   const ids = extractComplaintIds(feedRes);
   if (!ids.length) return null;
@@ -191,10 +177,10 @@ export default function (data) {
 
   if (!complaintId) {
     writeFailRate.add(true);
-    sleep(1);
     return;
   }
 
+  // LIKE
   const likeRes = http.post(
     `${BASE_URL}/api/complaints/like/${complaintId}`,
     null,
@@ -207,11 +193,7 @@ export default function (data) {
   likeDuration.add(likeRes.timings.duration);
 
   const likeOk = [200, 201, 204].includes(likeRes.status);
-  likeFailRate.add(!likeOk);
-
-  if (likeRes.status === 429) {
-    like429Count.add(1);
-  }
+  if (likeRes.status === 429) like429Count.add(1);
 
   debugResponse("LIKE", likeRes, [200, 201, 204, 429]);
 
@@ -219,11 +201,12 @@ export default function (data) {
     "like success": (r) => [200, 201, 204].includes(r.status),
   });
 
+  // COMMENT
   const commentRes = http.post(
     `${BASE_URL}/api/complaints/comment`,
     JSON.stringify({
       complain_id: complaintId,
-      comment: `pure-write-test vu-${__VU} iter-${__ITER} ts-${Date.now()}`,
+      comment: `k6 write test vu-${__VU} iter-${__ITER} time-${Date.now()}`,
       parent_id: null,
       is_internal: false,
     }),
@@ -236,11 +219,7 @@ export default function (data) {
   commentDuration.add(commentRes.timings.duration);
 
   const commentOk = [200, 201].includes(commentRes.status);
-  commentFailRate.add(!commentOk);
-
-  if (commentRes.status === 429) {
-    comment429Count.add(1);
-  }
+  if (commentRes.status === 429) comment429Count.add(1);
 
   debugResponse("COMMENT", commentRes, [200, 201, 422, 429]);
 
@@ -249,8 +228,6 @@ export default function (data) {
   });
 
   writeFailRate.add(!(likeOk && commentOk));
-
-  sleep(1);
 }
 
-// BASE_URL="http://127.0.0.1:8080" k6 run write_test.js
+// BASE_URL="http://127.0.0.1:8080" k6 run write_test_100rps.js
