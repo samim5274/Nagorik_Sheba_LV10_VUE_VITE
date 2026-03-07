@@ -40,8 +40,12 @@ return new class extends Migration
 
             $table->timestamps();
 
+            // index
+            $table->index(['complaint_id', 'is_deleted']);
             $table->index(['complaint_id', 'created_at']);
-            $table->index(['parent_id']);
+            $table->index('user_id');
+            $table->index('parent_id');
+            $table->index('created_at');
         });
     }
 

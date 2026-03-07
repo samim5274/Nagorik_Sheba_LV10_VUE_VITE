@@ -33,30 +33,61 @@ class ComplainController extends Controller
             //     ->latest('id');
 
             $query = Complaint::query()
-                ->with(['category','subCategory','division','district','upazila','policeStation'])
+                ->select([
+                    'id',
+                    'complaint_no',
+                    'title',
+                    'category_id',
+                    'sub_category_id',
+                    'division_id',
+                    'district_id',
+                    'upazila_id',
+                    'police_station_id',
+                    'status',
+                    'priority',
+                    'address_line',
+                    'created_at',
+                    'user_id',
+                    'is_public',
+                    'is_anonymous',
+                ])
+                ->with([
+                    'category:id,name',
+                    'subCategory:id,category_id,name',
+                    'division:id,name',
+                    'district:id,division_id,name',
+                    'upazila:id,district_id,name',
+                    'policeStation:id,upazila_id,name',
+                ])
                 ->withCount([
                     'likes',
                     'dislikes',
                     'comments as comments_count' => function ($q) {
                         $q->where('is_deleted', false);
                     },
-                ])
-                ->with([
-                    'reactions' => function ($q) use ($userId) {
-                        if ($userId) $q->where('user_id', $userId)->select('id','complaint_id','user_id','type');
-                        else $q->whereRaw('1=0'); // guest হলে empty
-                    }
-                ])
-                ->latest('id');
+                ]);
+
+                if ($userId) {
+                    $query->selectSub(
+                        ComplaintReaction::query()
+                            ->select('type')
+                            ->whereColumn('complaint_id', 'complaints.id')
+                            ->where('user_id', $userId)
+                            ->limit(1),
+                        'my_reaction'
+                    );
+                } else {
+                    $query->selectRaw('NULL as my_reaction');
+                }
+                
 
             // Search: complaint_no বা title
             if ($request->filled('complaint_no')) {
                 $term = trim($request->complaint_no);
 
                 $query->where(function ($q) use ($term) {
-                    $q->where('complaint_no', 'like', "%{$term}%")
-                    ->orWhere('title', 'like', "%{$term}%");
-                    // ->orWhere('description', 'like', "%{$term}%"); // চাইলে
+                    $q->where('complaint_no', 'like', '%' . $term . '%')
+                        ->orWhere('title', 'like', '%' . $term . '%');
                 });
             }
 
@@ -66,13 +97,13 @@ class ComplainController extends Controller
             }
 
             // paginate (page param auto handle করে)
-            $complaints = $query->paginate(15);
+            $complaints = $query->latest('id')->paginate(15);
 
-            $complaints->getCollection()->transform(function ($c) {
-                $c->my_reaction = $c->reactions->first()->type ?? null;
-                unset($c->reactions); // response clean
-                return $c;
-            });
+            // $complaints->getCollection()->transform(function ($c) {
+            //     $c->my_reaction = $c->reactions->first()->type ?? null;
+            //     unset($c->reactions); // response clean
+            //     return $c;
+            // });
 
             return response()->json([
                 'success' => true,
@@ -84,10 +115,15 @@ class ComplainController extends Controller
                 'message' => $e->getMessage(),
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Complaints can not fetched.',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
             ], 500);
         }
     }
@@ -379,7 +415,7 @@ class ComplainController extends Controller
                 'upazila',
                 'policeStation',
             ])
-            ->where('user_id', auth()->id());
+            ->where('user_id', auth('sanctum')->id());
 
             // complaint_no search
             if ($request->filled('complaint_no')) {
@@ -430,7 +466,10 @@ class ComplainController extends Controller
 
     public function delete($id){
         try{
-            $complaint = Complaint::where('status', 'pending')->where('id', $id)->where('user_id', auth()->id())->first();
+            $complaint = Complaint::where('status', 'pending')
+                ->where('id', $id)
+                ->where('user_id', auth()->id())
+                ->first();
 
             if (!$complaint) {
                 return response()->json([
@@ -621,14 +660,20 @@ class ComplainController extends Controller
 
     private function reactionCounts($complaintId, $userId)
     {
-        $likes = ComplaintReaction::where('complaint_id', $complaintId)->where('type', 'like')->count();
-        $dislikes = ComplaintReaction::where('complaint_id', $complaintId)->where('type', 'dislike')->count();
+        $counts = ComplaintReaction::where('complaint_id', $complaintId)
+            ->selectRaw("
+                SUM(CASE WHEN type = 'like' THEN 1 ELSE 0 END) as likes,
+                SUM(CASE WHEN type = 'dislike' THEN 1 ELSE 0 END) as dislikes
+            ")
+            ->first();
 
-        $my = ComplaintReaction::where('complaint_id', $complaintId)->where('user_id', $userId)->value('type'); // like/dislike/null
+        $my = ComplaintReaction::where('complaint_id', $complaintId)
+            ->where('user_id', $userId)
+            ->value('type');
 
         return [
-            'likes' => $likes,
-            'dislikes' => $dislikes,
+            'likes' => (int) ($counts->likes ?? 0),
+            'dislikes' => (int) ($counts->dislikes ?? 0),
             'my_reaction' => $my,
         ];
     }
@@ -659,9 +704,6 @@ class ComplainController extends Controller
             $user = $request->user();
 
             $ua = (string) $request->userAgent();
-            $device   = $this->detectDevice($ua);
-            $platform = $this->detectPlatform($ua);
-            $browser  = $this->detectBrowser($ua);
 
             $comment = ComplaintComments::create([
                 'complaint_id'        => (int) $request->complain_id,
@@ -689,7 +731,9 @@ class ComplainController extends Controller
             DB::commit();
 
             $comment->load('user:id,name,photo');
-            $commentsCount = ComplaintComments::where('complaint_id', $comment->complaint_id)->count();
+            $commentsCount = ComplaintComments::where('complaint_id', $comment->complaint_id)
+                ->where('is_deleted', false)
+                ->count();
             return response()->json([
                 'success' => true,
                 'message' => 'Comment added',
@@ -727,11 +771,13 @@ class ComplainController extends Controller
 
     public function showComment($id){
         try{
-            $data = ComplaintComments::with(['user:id,name,photo'])
-                ->where('complaint_id', $id)->where('is_deleted', false)
+            $comments = ComplaintComments::with(['user:id,name,photo'])
+                ->where('complaint_id', $id)
+                ->where('is_deleted', false)
                 ->latest('id')
-                ->get()
-                ->map(function ($c) {
+                ->paginate(5);
+
+                $comments->getCollection()->transform(function ($c) {
                     return [
                         'id' => $c->id,
                         'complaint_id' => $c->complaint_id,
@@ -745,17 +791,16 @@ class ComplainController extends Controller
                     ];
                 });
 
-
             return response()->json([
                 'success' => true,
                 'message' => 'Fetched complaint comments.',
-                'data' => $data
+                'data' => $comments,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetched complaint comment.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Server error'
+                'error' => config('app.debug') ? $e->getMessage() : 'Server error',
             ], 500);
         }
     }

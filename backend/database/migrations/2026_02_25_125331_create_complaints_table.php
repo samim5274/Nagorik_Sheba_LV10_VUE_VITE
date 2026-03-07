@@ -94,11 +94,13 @@ return new class extends Migration
             $table->softDeletes();
 
             // Indexes
+            $table->index('status');
+            $table->index('user_id');
+            $table->index('created_at');
             $table->index(['status', 'priority']);
             $table->index(['division_id', 'district_id']);
             $table->index(['assigned_to', 'status']);
-            $table->index(['created_at']);
-            $table->index(['complainant_phone']);
+            $table->index(['user_id', 'status']);
         });
     }
 

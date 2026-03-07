@@ -314,6 +314,24 @@
                                                             </div>
                                                         </div>
 
+                                                        <div 
+                                                            v-if="
+                                                                commentsPageInfo[complaint.id] &&
+                                                                commentsPageInfo[complaint.id].current_page < commentsPageInfo[complaint.id].last_page
+                                                            " class="pt-2">
+                                                            <button
+                                                                type="button"
+                                                                @click.stop="loadMoreComments(complaint.id)"
+                                                                :disabled="commentsPageInfo[complaint.id]?.loadingMore"
+                                                                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                {{
+                                                                    commentsPageInfo[complaint.id]?.loadingMore
+                                                                        ? "Loading..."
+                                                                        : "Show more comments"
+                                                                }}
+                                                            </button>
+                                                        </div>
+
                                                         <!-- Empty -->
                                                         <div
                                                             v-if="!(commentsByComplaint[complaint.id]?.length)"
@@ -325,7 +343,7 @@
 
                                                 <!-- Comment box (full width on mobile) -->
                                                 <div class="mt-4">
-                                                    <form @submit.prevent="submitComment" class="space-y-6">
+                                                    <form @submit.prevent="submitComment(complaint.id)" class="space-y-6">
                                                         <div class="flex items-start gap-3">
                                                             <!-- Avatar -->
                                                             <div class="h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
@@ -340,7 +358,7 @@
                                                                     <i class="fa-regular fa-face-smile text-slate-400 dark:text-slate-500"></i>
 
                                                                     <input
-                                                                    type="text" v-model="commentText[complaint.id]" @focus="form.complain_id = complaint.id"
+                                                                    type="text" v-model="commentText[complaint.id]"
                                                                     placeholder="Write a comment..."
                                                                     class="w-full min-w-0 bg-transparent text-[13px] sm:text-sm text-slate-900 placeholder:text-slate-400 outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
                                                                     @click.stop/>
@@ -519,7 +537,7 @@ function viewComplaint(complaint) {
 const currentPage = ref(1);
 const lastPage = ref(1);
 const total = ref(0);
-const perPage = ref(20);
+const perPage = ref(15);
 const fromItem = ref(0);
 const toItem = ref(0);
 
@@ -711,14 +729,10 @@ async function getDisLike(complain){
  */
 const commentText = reactive({});
 
-const form = reactive({
-    complain_id: null,
-});
-
-async function submitComment(){
+async function submitComment(complaintId){
     resetErrorAndLoading();
 
-    const id = form.complain_id;
+    const id = complaintId;
     if (!id) {
         errorMsg.value = "Select a complaint first.";
         loading.value = false;
@@ -744,7 +758,7 @@ async function submitComment(){
 
         const created = res.data?.data;
         // complaint id বের করো (safe)
-        const cid = created?.complaint_id ?? form.complain_id; // id = form.complain_id (focused complaint id)
+        const cid = created?.complaint_id ?? id; // id = form.complain_id (focused complaint id)
 
         commentsOpen[cid] = true;
         if (!Array.isArray(commentsByComplaint[cid])) commentsByComplaint[cid] = [];
@@ -803,6 +817,16 @@ function formatCount(value) {
     return num.toString();
 }
 
+const commentsPageInfo = reactive({}); 
+// {
+//   [complaintId]: {
+//      current_page: 1,
+//      last_page: 1,
+//      total: 0,
+//      loadingMore: false,
+//   }
+// }
+
 async function toggleComments(complaint) {
     const id = complaint.id;
 
@@ -810,27 +834,77 @@ async function toggleComments(complaint) {
     if (commentsLoading[id] == null) commentsLoading[id] = false;
     if (commentsError[id] == null) commentsError[id] = "";
 
+    if (!commentsPageInfo[id]) {
+        commentsPageInfo[id] = {
+            current_page: 1,
+            last_page: 1,
+            total: 0,
+            loadingMore: false,
+        };
+    }
+
     commentsOpen[id] = !commentsOpen[id];
 
     if (commentsOpen[id] && commentsByComplaint[id].length === 0) {
-        await fetchComments(id);
+        await fetchComments(id, 1, false);
     }
 }
 
-async function fetchComments(complaintId) {
-    commentsLoading[complaintId] = true;
+async function fetchComments(complaintId, page = 1, append = false) {
+    commentsLoading[complaintId] = page === 1;
     commentsError[complaintId] = "";
 
+    if (!commentsPageInfo[complaintId]) {
+        commentsPageInfo[complaintId] = {
+            current_page: 1,
+            last_page: 1,
+            total: 0,
+            loadingMore: false,
+        };
+    }
+
+    if (page > 1) {
+        commentsPageInfo[complaintId].loadingMore = true;
+    }
+
     try {
-        const res = await api.get(`/complaints/get-comment/${complaintId}`);
-        const list = res.data?.data;
-        commentsByComplaint[complaintId] = Array.isArray(list) ? list : [];
+        const res = await api.get(`/complaints/get-comment/${complaintId}?page=${page}`);
+        const payload = res.data?.data;
+        const list = payload?.data ?? [];
+        if (append) {
+            commentsByComplaint[complaintId] = [
+                ...(commentsByComplaint[complaintId] || []),
+                ...list,
+            ];
+        } else {
+            commentsByComplaint[complaintId] = list;
+        }
+        
+        commentsPageInfo[complaintId] = {
+            ...commentsPageInfo[complaintId],
+            current_page: payload?.current_page ?? 1,
+            last_page: payload?.last_page ?? 1,
+            total: payload?.total ?? 0,
+            loadingMore: false,
+        };
     } catch (err) {
         commentsError[complaintId] = err?.response?.data?.message || "Failed to load comments";
-        commentsByComplaint[complaintId] = [];
+        if (!append) commentsByComplaint[complaintId] = [];
+        if (commentsPageInfo[complaintId]) {
+            commentsPageInfo[complaintId].loadingMore = false;
+        }
     } finally {
         commentsLoading[complaintId] = false;
     }
+}
+
+async function loadMoreComments(complaintId) {
+    const pageInfo = commentsPageInfo[complaintId];
+    if (!pageInfo) return;
+    if (pageInfo.loadingMore) return;
+    if (pageInfo.current_page >= pageInfo.last_page) return;
+
+    await fetchComments(complaintId, pageInfo.current_page + 1, true);
 }
 
 

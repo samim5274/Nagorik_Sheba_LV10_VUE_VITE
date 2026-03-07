@@ -22,6 +22,8 @@ return new class extends Migration
 
             // one user -> one reaction per complaint
             $table->unique(['complaint_id', 'user_id']);
+            $table->index(['complaint_id', 'type']);
+            $table->index('user_id');
         });
     }
 
